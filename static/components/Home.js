@@ -40,25 +40,24 @@ export default {
         });
     },
     requestService(freelancerId) {
-      console.log("Sending request with:", {
-        freelancerId: freelancerId,
-        userId: localStorage.getItem("user-id"),
-      });
+      const userId = localStorage.getItem("user-id");
+      console.log("User ID:", userId);
 
       fetch("/api/request-service", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
         },
         body: JSON.stringify({
-          freelancerId: freelancerId,
-          userId: localStorage.getItem("user-id"),
+          user_id: userId, // Use userId from local storage
+          freelancer_id: freelancerId, // Use freelancerId from method parameter
         }),
       })
         .then((res) => {
           if (!res.ok) {
-            throw new Error("Service request failed.");
+            return res.text().then((text) => {
+              throw new Error(`Service request failed: ${text}`);
+            });
           }
           return res.json();
         })
@@ -68,6 +67,7 @@ export default {
         })
         .catch((error) => {
           console.error("Error sending service request:", error);
+          alert("Error sending service request: " + error.message);
         });
     },
     showBookDetail(book) {
@@ -76,7 +76,7 @@ export default {
   },
   created() {
     this.getAllBooks();
-    this.getAllFreelancers(); 
+    this.getAllFreelancers();
   },
   template: `
     <div class="px-3 mt-3 pb-5">

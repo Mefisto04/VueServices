@@ -1,38 +1,34 @@
-export default ({
-    data: () => ({
-        user: {
-            email: '',
-            name: '',
-            password: ''
-        },
-        error:''
-    }),
-    methods: {
-        async register() {
-            fetch('/user-register',
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(this.user)
-                }
-            )
-
-                .then(async (res) => {
-                    const data = await res.json();
-                    if (res.ok) {
-                        localStorage.setItem('auth-token', data.token)
-                        localStorage.setItem('role', data.role)
-                        this.$router.push({path: '/'})
-                    } else {
-                        this.error = data.message
-                    }
-
-                });
-        }
+export default {
+  data: () => ({
+    user: {
+      email: "",
+      name: "",
+      password: "",
     },
-    template: `
+    error: "",
+  }),
+  methods: {
+    async register() {
+      fetch("/user-register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(this.user),
+      }).then(async (res) => {
+        const data = await res.json();
+        if (res.ok) {
+          localStorage.setItem("user-id", data.user_id);
+          localStorage.setItem("auth-token", data.token);
+          localStorage.setItem("role", data.role);
+          this.$router.push({ path: "/" });
+        } else {
+          this.error = data.message;
+        }
+      });
+    },
+  },
+  template: `
     <div class="row">
         <div class="col-lg-6 pb-5" style="height:100vh;background:url('static/img/renaissance.jpg');background-size:cover;">
         </div>
@@ -68,5 +64,5 @@ export default ({
         </div>
         </div>
     </div>
-    `
-})
+    `,
+};

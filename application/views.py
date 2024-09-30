@@ -1,13 +1,13 @@
-from flask import current_app as app
+from datetime import datetime
+from flask import current_app as app, session
 from flask import current_app as app, jsonify, request, render_template, send_file
 from flask.json import dump
 from flask_security import auth_required, roles_required
 from sqlalchemy import or_
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_restful import marshal, fields
-from .models import User, db, Freelancer,Admin
+from .models import User, db, Freelancer,Admin,ServiceRequest
 from .sec import datastore
-
 
 # from .sec import datastore
 
@@ -81,7 +81,7 @@ def user_register():
     db.session.add(user)
 
     db.session.commit()
-    return jsonify({"token": user.get_auth_token(), "email": user.email, "role": user.roles[0].name}),201
+    return jsonify({"token": user.get_auth_token(), "email": user.email, "role": user.roles[0].name,"user_id": user.id}),201
 
 
 @app.post('/freelancer-register')
@@ -238,3 +238,68 @@ def update_freelancer():
         db.session.rollback()
         app.logger.error(f"Error updating freelancer: {str(e)}")
         return jsonify({"message": "Error occurred during update"}), 400
+    
+@app.route('/api/request-service', methods=['POST'])
+def request_service():
+    data = request.get_json()
+    print("Incoming request data:", data)  # Log the incoming request data
+
+    user_id = data.get('user_id')
+    freelancer_id = data.get('freelancer_id')  # Ensure you extract freelancer_id from request data
+
+    if user_id is None:
+        return jsonify({'error': 'User ID is required'}), 400
+    if freelancer_id is None:
+        return jsonify({'error': 'Freelancer ID is required'}), 400  # Check if freelancer_id is provided
+
+    try:
+        new_request = ServiceRequest(
+            user_id=user_id,
+            freelancer_id=freelancer_id,
+            status='pending',
+            request_date=datetime.now()
+        )
+        db.session.add(new_request)
+        db.session.commit()
+        
+        return jsonify({'message': 'Service request created successfully'}), 201
+    except Exception as e:
+        print("Error creating service request:", e)  # Log any error that occurs
+        return jsonify({'error': 'An error occurred while creating the service request'}), 500
+
+
+@app.route('/api/request-service/<int:request_id>', methods=['PUT'])
+def update_service_request(request_id):
+    data = request.get_json()
+    status = data.get('status')
+
+    if status not in ['accepted', 'rejected']:
+        return jsonify({'error': 'Invalid status'}), 400
+
+    # Find the service request by ID
+    service_request = ServiceRequest.query.get_or_404(request_id)
+    service_request.status = status
+    db.session.commit()
+
+    return jsonify({
+        'message': 'Service request status updated',
+        'service_request_id': service_request.id,
+        'status': service_request.status
+    }), 200
+
+
+@app.route('/api/service-requests/freelancer/<string:uniquifier>', methods=['GET'])
+def get_freelancer_service_requests(uniquifier):
+    freelancer = Freelancer.query.filter_by(fs_uniquifier=uniquifier).first()
+    
+    if freelancer is None:
+        return jsonify({'error': 'Freelancer not found'}), 404
+
+    requests = ServiceRequest.query.filter_by(freelancer_id=freelancer.id).all()
+    
+    return jsonify([{
+        'request_id': req.id,
+        'user_id': req.user_id,
+        'status': req.status,
+        'created_at': req.request_date  # Ensure this matches the correct column
+    } for req in requests]), 200

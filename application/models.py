@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask_login import current_user
 from flask_security import RoleMixin, UserMixin
 from flask_sqlalchemy import SQLAlchemy
@@ -39,6 +40,18 @@ class Freelancer(db.Model, UserMixin):
     portfolio_url = db.Column(db.String(255))  # New field for portfolio URL
     active = db.Column(db.Boolean())
     fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
+
+class ServiceRequest(db.Model):
+    __tablename__ = 'service_requests'
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    freelancer_id = db.Column(db.Integer, db.ForeignKey('freelancers.id'), nullable=False)
+    status = db.Column(db.String(50), default="pending", nullable=False)
+    request_date = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<ServiceRequest {self.id} from User {self.user_id} to Freelancer {self.freelancer_id}>"
+
 
 
 # Admin model
