@@ -18,7 +18,7 @@ export default {
         });
 
         const data = await res.json();
-        console.log(data); // Log the response to see its structure
+        console.log(data);
         if (res.ok) {
           // localStorage.setItem("role", data.role);
           console.log("Login successful, navigating to /admin");

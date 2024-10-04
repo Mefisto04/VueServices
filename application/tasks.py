@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-
 from celery import shared_task
 import flask_excel as excel
 from .mail_service import send_message
@@ -10,21 +9,6 @@ from celery.utils.log import get_task_logger
 from .user_reports import generate_reports
 
 logger = get_task_logger(__name__)
-
-
-# @shared_task(ignore_result=False)
-# def create_resource_csv():
-#     stud_res = StudyResource.query.with_entities(
-#         StudyResource.topic, StudyResource.description).all()
-#
-#     csv_output = excel.make_response_from_query_sets(
-#         stud_res, ["topic", "description"], "csv")
-#     filename = "test.csv"
-#
-#     with open(filename, 'wb') as f:
-#         f.write(csv_output.data)
-#
-#     return filename
 
 
 @shared_task(ignore_result=True)

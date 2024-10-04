@@ -9,23 +9,28 @@ export default {
   }),
   methods: {
     async register() {
-      fetch("/user-register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(this.user),
-      }).then(async (res) => {
-        const data = await res.json();
+      try {
+        const res = await fetch("/user-register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(this.user),
+        });
+        const data = await res.json(); // This will throw an error if the response is not JSON
+
         if (res.ok) {
           localStorage.setItem("user-id", data.user_id);
           localStorage.setItem("auth-token", data.token);
           localStorage.setItem("role", data.role);
           this.$router.push({ path: "/" });
         } else {
-          this.error = data.message;
+          this.error = data.message || "An error occurred";
         }
-      });
+      } catch (error) {
+        console.error("Error registering user:", error);
+        this.error = "An unexpected error occurred.";
+      }
     },
   },
   template: `

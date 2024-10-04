@@ -25,37 +25,16 @@ def user_login():
 
     user = datastore.find_user(email=email)
 
-    if "member" not in user.roles:
-        return jsonify({"message": "User Not a Member"}), 404
+    # if "member" not in user.roles:
+    #     return jsonify({"message": "User Not a Member"}), 404
 
     if not user:
         return jsonify({"message": "User Not Found"}), 404
 
     if check_password_hash(user.password, data.get("password")):
-        return jsonify({"token": user.get_auth_token(), "email": user.email, "role": user.roles[0].name})
+        return jsonify({"token": user.get_auth_token(), "email": user.email})
     else:
         return jsonify({"message": "Wrong Password"}), 400
-
-
-@app.post('/lib-login')
-def librarian_login():
-    data = request.get_json()
-    email = data.get('email')
-    if not email:
-        return jsonify({"message": "Email not provided"}), 400
-
-    user = datastore.find_user(email=email)
-    if "libr" not in user.roles:
-        return jsonify({"message": "User Not a Librarian"}), 404
-
-    if not user:
-        return jsonify({"message": "User Not Found"}), 404
-
-    if check_password_hash(user.password, data.get("password")):
-        return jsonify({"token": user.get_auth_token(), "email": user.email, "role": user.roles[0].name})
-    else:
-        return jsonify({"message": "Wrong Password"}), 400
-
 
 @app.post('/user-register')
 def user_register():
@@ -63,6 +42,7 @@ def user_register():
     email = data.get('email')
     name = data.get('name')
     password = data.get('password')
+
     if not email:
         return jsonify({"message": "email not provided"}), 400
 
@@ -73,16 +53,24 @@ def user_register():
         return jsonify({"message": "password not provided"}), 400
 
     user_exists = User.query.filter_by(email=email).count()
-    if(user_exists):
-        return {"message":"Email already taken, use another email"},401
-    user = datastore.create_user(email=email, name=name, password=generate_password_hash(password), active=True,
-                                 roles=["member"])
+    if user_exists:
+        return jsonify({"message": "Email already taken, use another email"}), 401
+
+    # Create user and add to the database
+    user = datastore.create_user(
+        email=email, name=name, password=generate_password_hash(password),
+        active=True, roles=["member"]
+    )
 
     db.session.add(user)
-
     db.session.commit()
-    return jsonify({"token": user.get_auth_token(), "email": user.email, "role": user.roles[0].name,"user_id": user.id}),201
 
+    # Return user details with token
+    return jsonify({
+        "token": user.get_auth_token(),
+        "email": user.email,
+        "user_id": user.id
+    }), 201
 
 @app.post('/freelancer-register')
 def freelancer_register():
@@ -242,15 +230,15 @@ def update_freelancer():
 @app.route('/api/request-service', methods=['POST'])
 def request_service():
     data = request.get_json()
-    print("Incoming request data:", data)  # Log the incoming request data
+    print("Incoming request data:", data)  
 
     user_id = data.get('user_id')
-    freelancer_id = data.get('freelancer_id')  # Ensure you extract freelancer_id from request data
+    freelancer_id = data.get('freelancer_id')  
 
     if user_id is None:
         return jsonify({'error': 'User ID is required'}), 400
     if freelancer_id is None:
-        return jsonify({'error': 'Freelancer ID is required'}), 400  # Check if freelancer_id is provided
+        return jsonify({'error': 'Freelancer ID is required'}), 400  
 
     try:
         new_request = ServiceRequest(
@@ -276,7 +264,6 @@ def update_service_request(request_id):
     if status not in ['accepted', 'rejected']:
         return jsonify({'error': 'Invalid status'}), 400
 
-    # Find the service request by ID
     service_request = ServiceRequest.query.get_or_404(request_id)
     service_request.status = status
     db.session.commit()
@@ -288,18 +275,37 @@ def update_service_request(request_id):
     }), 200
 
 
+
 @app.route('/api/service-requests/freelancer/<string:uniquifier>', methods=['GET'])
 def get_freelancer_service_requests(uniquifier):
+    print(uniquifier)
+    # freelancer = Freelancer.query.filter_by(fs_uniquifier=uniquifier).first()
+    print(f"Uniquifier received: {uniquifier}")  # Debug line
     freelancer = Freelancer.query.filter_by(fs_uniquifier=uniquifier).first()
-    
+    print(f"Freelancer found: {freelancer}")  # Debug line
+
     if freelancer is None:
         return jsonify({'error': 'Freelancer not found'}), 404
 
     requests = ServiceRequest.query.filter_by(freelancer_id=freelancer.id).all()
-    
-    return jsonify([{
-        'request_id': req.id,
-        'user_id': req.user_id,
-        'status': req.status,
-        'created_at': req.request_date  # Ensure this matches the correct column
-    } for req in requests]), 200
+
+    response = []
+    for req in requests:
+        user = User.query.get(req.user_id)  # Fetch the user who made the request
+        if user:
+            user_data = {
+                'user_id': user.id,
+                'user_name': user.name,  # Assuming 'name' exists in the User model
+                'user_email': user.email,  # Assuming 'email' exists in the User model
+            }
+        else:
+            user_data = {}
+
+        response.append({
+            'request_id': req.id,
+            'status': req.status,
+            'created_at': req.request_date,
+            'user': user_data  # Add user details to the response
+        })
+
+    return jsonify(response), 200

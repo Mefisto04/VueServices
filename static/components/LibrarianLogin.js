@@ -1,37 +1,32 @@
-export default({
-    data:()=>({
-       user :{
-           email:'',
-           password:''
-       },
-        error:''
-    }),
-    methods:{
-        async login(){
-            fetch('/lib-login',
-                {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(this.user)
-                    }
-                )
-
-                .then(async (res) => {
-                    const data = await res.json();
-                    if (res.ok) {
-                        localStorage.setItem('auth-token', data.token)
-                        localStorage.setItem('role', data.role)
-                        this.$router.push({path: '/'})
-                    } else {
-                        this.error = data.message
-                    }
-
-                });
-        }
+export default {
+  data: () => ({
+    user: {
+      email: "",
+      password: "",
     },
-    template:`
+    error: "",
+  }),
+  methods: {
+    async login() {
+      fetch("/lib-login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(this.user),
+      }).then(async (res) => {
+        const data = await res.json();
+        if (res.ok) {
+          localStorage.setItem("auth-token", data.token);
+          localStorage.setItem("role", data.role);
+          this.$router.push({ path: "/" });
+        } else {
+          this.error = data.message;
+        }
+      });
+    },
+  },
+  template: `
     <div class="row">
 
         <div class="col-lg-6">
@@ -64,5 +59,5 @@ export default({
 
         </div>
     </div>
-    `
-})
+    `,
+};

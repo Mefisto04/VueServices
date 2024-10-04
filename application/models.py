@@ -63,60 +63,7 @@ class Admin(db.Model, UserMixin):
     password = db.Column(db.String(255))
     active = db.Column(db.Boolean())
     fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
-    # You can add more fields specific to Admin here
-
-
-
-# class RolesUsers(db.Model):
-#     __tablename__ = 'roles_users'
-#     id = db.Column(db.Integer(), primary_key=True)
-#     user_id = db.Column('user_id', db.Integer(), db.ForeignKey('users.id'))
-#     role_id = db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
-
-# class Role(db.Model, RoleMixin):
-#     id = db.Column(db.Integer(), primary_key=True)
-#     name = db.Column(db.String(80), unique=True)
-#     description = db.Column(db.String(255))
-
-# class User(db.Model, UserMixin):
-#     __tablename__ = 'users'
-#     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-#     name = db.Column(db.String(30))
-#     email = db.Column(db.String(), unique=True)
-#     password = db.Column(db.String(255))
-#     active = db.Column(db.Boolean())
-#     fav_book = db.Column(db.Integer)
-#     fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
-#     roles = db.relationship('Role', secondary='roles_users',
-#                             backref=db.backref('users', lazy='dynamic'))
-
-# class Freelancer(db.Model, UserMixin):
-#     __tablename__ = 'freelancers'
-#     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-#     name = db.Column(db.String(30))
-#     email = db.Column(db.String(), unique=True)
-#     password = db.Column(db.String(255))
-#     experience = db.Column(db.String(100))
-#     portfolio_url = db.Column(db.String(255))  
-#     active = db.Column(db.Boolean())
-#     fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
     
-#     # Establishing a relationship to the roles_users table
-#     roles = db.relationship('Role', secondary='roles_users',
-#                             primaryjoin=(id == RolesUsers.user_id),
-#                             backref=db.backref('freelancers', lazy='dynamic'))
-
-
-# class Admin(db.Model):
-#     __tablename__ = 'admins'
-#     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-#     name = db.Column(db.String(30))
-#     email = db.Column(db.String(), unique=True, nullable=False)
-#     password = db.Column(db.String(255))
-#     active = db.Column(db.Boolean(), default=True)
-#     roles = db.relationship('Role', secondary='roles_users',
-#                             backref=db.backref('admins', lazy='dynamic'))
-
 class Book(db.Model):
     __tablename__ = 'books'
     book_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
@@ -199,3 +146,4 @@ class DailyVisit(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     date = db.Column(db.Date)
     user = db.relationship('User', backref='visits')
+

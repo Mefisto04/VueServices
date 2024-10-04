@@ -3,13 +3,12 @@ from flask import Flask, jsonify
 from flask_security import Security
 
 from application.instances import cache
-from application.models import db,User,Freelancer
+from application.models import db,Freelancer,User
 from application.sec import datastore
 from config import DevelopmentConfig
 from application.resources import api
 from application.worker import celery_init_app
 from application.tasks import daily_reminder, mark_overdue_requests_as_revoked, send_monthly_report
-
 
 def create_app():
     app = Flask(__name__)
@@ -34,7 +33,7 @@ def automated_tasks(sender, **kwargs):
     sender.add_periodic_task(
         30,
         # crontab(hour=19,minute=58),
-        daily_reminder.s(),
+        # daily_reminder.s(),
     )
 
     # revoke overdue books
