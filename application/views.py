@@ -16,25 +16,53 @@ def index():
     return render_template('index.html')
 
 
-@app.post('/user-login')
+def find_user(email):
+    return User.query.filter_by(email=email).first()
+
+@app.route('/user-login', methods=['POST'])
 def user_login():
     data = request.get_json()
     email = data.get('email')
-    if not email:
-        return jsonify({"message": "Email not provided"}), 400
+    password = data.get('password')  # Get the password from the request
 
-    user = datastore.find_user(email=email)
+    if not email or not password:
+        return jsonify({"message": "Email or password not provided"}), 400
 
-    # if "member" not in user.roles:
-    #     return jsonify({"message": "User Not a Member"}), 404
+    # Fetch user from the datastore
+    user = find_user(email=email)
 
     if not user:
         return jsonify({"message": "User Not Found"}), 404
 
-    if check_password_hash(user.password, data.get("password")):
-        return jsonify({"token": user.get_auth_token(), "email": user.email})
+    # Verify the password
+    if check_password_hash(user.password, password):
+        return jsonify({
+            "token": user.get_auth_token(),  # Assuming user token generation exists
+            "email": user.email,
+            "name": user.name
+        }), 200
     else:
-        return jsonify({"message": "Wrong Password"}), 400
+        return jsonify({"message": "Incorrect Password"}), 400
+
+# @app.post('/user-login')
+# def user_login():
+#     data = request.get_json()
+#     email = data.get('email')
+#     if not email:
+#         return jsonify({"message": "Email not provided"}), 400
+
+#     user = datastore.find_user(email=email)
+
+#     # if "member" not in user.roles:
+#     #     return jsonify({"message": "User Not a Member"}), 404
+
+#     if not user:
+#         return jsonify({"message": "User Not Found"}), 404
+
+#     if check_password_hash(user.password, data.get("password")):
+#         return jsonify({"token": user.get_auth_token(), "email": user.email})
+#     else:
+#         return jsonify({"message": "Wrong Password"}), 400
 
 @app.post('/user-register')
 def user_register():
@@ -234,18 +262,28 @@ def request_service():
 
     user_id = data.get('user_id')
     freelancer_id = data.get('freelancer_id')  
+    service_date = data.get('service_date')  
 
     if user_id is None:
         return jsonify({'error': 'User ID is required'}), 400
     if freelancer_id is None:
         return jsonify({'error': 'Freelancer ID is required'}), 400  
+    if service_date is None:
+        return jsonify({'error': 'Service date is required'}), 400
+
+    try:
+        service_date_parsed = datetime.strptime(service_date, '%Y-%m-%dT%H:%M')
+    except ValueError as ve:
+        print("Datetime parsing error:", ve)  
+        return jsonify({'error': 'Invalid service date format. Expected format is YYYY-MM-DDTHH:MM'}), 400
 
     try:
         new_request = ServiceRequest(
             user_id=user_id,
             freelancer_id=freelancer_id,
             status='pending',
-            request_date=datetime.now()
+            request_date=datetime.now(),
+            service_date=service_date_parsed
         )
         db.session.add(new_request)
         db.session.commit()
@@ -279,10 +317,9 @@ def update_service_request(request_id):
 @app.route('/api/service-requests/freelancer/<string:uniquifier>', methods=['GET'])
 def get_freelancer_service_requests(uniquifier):
     print(uniquifier)
-    # freelancer = Freelancer.query.filter_by(fs_uniquifier=uniquifier).first()
-    print(f"Uniquifier received: {uniquifier}")  # Debug line
+    print(f"Uniquifier received: {uniquifier}")  
     freelancer = Freelancer.query.filter_by(fs_uniquifier=uniquifier).first()
-    print(f"Freelancer found: {freelancer}")  # Debug line
+    print(f"Freelancer found: {freelancer}")  
 
     if freelancer is None:
         return jsonify({'error': 'Freelancer not found'}), 404
@@ -291,12 +328,12 @@ def get_freelancer_service_requests(uniquifier):
 
     response = []
     for req in requests:
-        user = User.query.get(req.user_id)  # Fetch the user who made the request
+        user = User.query.get(req.user_id)  
         if user:
             user_data = {
                 'user_id': user.id,
-                'user_name': user.name,  # Assuming 'name' exists in the User model
-                'user_email': user.email,  # Assuming 'email' exists in the User model
+                'user_name': user.name, 
+                'user_email': user.email,  
             }
         else:
             user_data = {}
@@ -305,7 +342,20 @@ def get_freelancer_service_requests(uniquifier):
             'request_id': req.id,
             'status': req.status,
             'created_at': req.request_date,
-            'user': user_data  # Add user details to the response
+            'service_date': req.service_date,
+            'user': user_data  
         })
 
     return jsonify(response), 200
+
+
+@app.route('/api/service-requests/<int:user_id>', methods=['GET'])
+def get_service_requests(user_id):
+    requests = ServiceRequest.query.filter_by(user_id=user_id).all()
+    return jsonify([{
+        'id': req.id,
+        'freelancer_id': req.freelancer_id,
+        'service_date': req.service_date.isoformat(),
+        'status': req.status,
+        'request_date': req.request_date.isoformat(),
+    } for req in requests]), 200

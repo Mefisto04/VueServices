@@ -1,6 +1,7 @@
 from main import app
 from application.models import db, Role, User, Freelancer, RolesUsers, Admin, ServiceRequest
 from flask_security import hash_password
+from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash
 
 with app.app_context():
@@ -33,8 +34,8 @@ with app.app_context():
     # Create freelancer users
     freelancers = [
         {"name": "Freelancer One", "email": "freelancer1@gmail.com", "experience": "5 years in web development", "portfolio_url": "https://portfolio-one.com", "fs_uniquifier": "freelancer1_unique_identifier"},
-        {"name": "Freelancer Two", "email": "freelancer2@gmail.com", "experience": "3 years in graphic design", "portfolio_url": "https://portfolio-two.com", "fs_uniquifier": "freelancer2_unique_identifier"},
-        {"name": "Freelancer Three", "email": "freelancer3@gmail.com", "experience": "7 years in app development", "portfolio_url": "https://portfolio-three.com", "fs_uniquifier": "freelancer3_unique_identifier"}
+        # {"name": "Freelancer Two", "email": "freelancer2@gmail.com", "experience": "3 years in graphic design", "portfolio_url": "https://portfolio-two.com", "fs_uniquifier": "freelancer2_unique_identifier"},
+        # {"name": "Freelancer Three", "email": "freelancer3@gmail.com", "experience": "7 years in app development", "portfolio_url": "https://portfolio-three.com", "fs_uniquifier": "freelancer3_unique_identifier"}
     ]
 
     for freelancer_data in freelancers:
@@ -56,9 +57,9 @@ with app.app_context():
 
     # Create member users
     members = [
-        {"name": "Student 1", "email": "user1@gmail.com", "fs_uniquifier": "stud1_unique_identifier"},
-        {"name": "Student 2", "email": "user2@gmail.com", "fs_uniquifier": "stud2_unique_identifier"},
-        {"name": "Student 3", "email": "user3@gmail.com", "fs_uniquifier": "stud3_unique_identifier"}
+        {"name": "User 1", "email": "user1@gmail.com", "fs_uniquifier": "stud1_unique_identifier"},
+        # {"name": "User 2", "email": "user2@gmail.com", "fs_uniquifier": "stud2_unique_identifier"},
+        # {"name": "User 3", "email": "user3@gmail.com", "fs_uniquifier": "stud3_unique_identifier"}
     ]
 
     for member_data in members:
@@ -79,14 +80,31 @@ with app.app_context():
     # Create Service Requests
     user1 = db.session.query(User).filter_by(email="user1@gmail.com").first()
     freelancer1 = db.session.query(Freelancer).filter_by(email="freelancer1@gmail.com").first()
-    freelancer2 = db.session.query(Freelancer).filter_by(email="freelancer2@gmail.com").first()
+    # freelancer2 = db.session.query(Freelancer).filter_by(email="freelancer2@gmail.com").first()
+
+    service_date1 = datetime.now() + timedelta(days=3)
+    service_date1 = service_date1.replace(hour=10, minute=0)
+
+    service_date2 = datetime.now() + timedelta(days=5)
+    service_date2 = service_date2.replace(hour=14, minute=0)
 
     if user1 and freelancer1:
-        service_request1 = ServiceRequest(user_id=user1.id, freelancer_id=freelancer1.id, status="pending")
+        service_request1 = ServiceRequest(
+            user_id=user1.id,
+            freelancer_id=freelancer1.id,
+            status="pending",
+            service_date=service_date1
+        )
         db.session.add(service_request1)
 
-    if user1 and freelancer2:
-        service_request2 = ServiceRequest(user_id=user1.id, freelancer_id=freelancer2.id, status="pending")
-        db.session.add(service_request2)
+    # if user1 and freelancer2:
+    #     service_request2 = ServiceRequest(
+    #         user_id=user1.id,
+    #         freelancer_id=freelancer2.id,
+    #         status="pending",
+    #         service_date=service_date2
+    #     )
+    #     db.session.add(service_request2)
 
+    # Commit the transaction
     db.session.commit()

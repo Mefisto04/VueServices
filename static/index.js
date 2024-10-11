@@ -1,12 +1,10 @@
-import router from './router.js'
-import NavBar from './components/NavBar.js'
-
-
+import router from "./router.js";
+import NavBar from "./components/NavBar.js";
 
 new Vue({
-  el: '#app',
+  el: "#app",
   template: `
-    <div class="bg-dark min-vh">
+    <div class="bg-dark">
       <div class="container">
         <NavBar :key='has_changed'/>
         <router-view class=""/>
@@ -22,7 +20,7 @@ new Vue({
   },
   watch: {
     $route(to, from) {
-      this.has_changed = !this.has_changed
+      this.has_changed = !this.has_changed;
     },
   },
-})
+});

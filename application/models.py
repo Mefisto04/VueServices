@@ -18,8 +18,8 @@ class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80), unique=True)
     description = db.Column(db.String(255))
-    users = db.relationship('User', secondary='roles_users', backref=db.backref('roles', lazy='dynamic'))
-    freelancers = db.relationship('Freelancer', secondary='roles_users', backref=db.backref('roles', lazy='dynamic'))
+    users = db.relationship('User', secondary='roles_users', backref=db.backref('roles', lazy='dynamic'),overlaps="freelancers,roles")
+    freelancers = db.relationship('Freelancer', secondary='roles_users', backref=db.backref('roles', lazy='dynamic'),overlaps="freelancers,roles")
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
@@ -48,6 +48,7 @@ class ServiceRequest(db.Model):
     freelancer_id = db.Column(db.Integer, db.ForeignKey('freelancers.id'), nullable=False)
     status = db.Column(db.String(50), default="pending", nullable=False)
     request_date = db.Column(db.DateTime, default=datetime.utcnow)
+    service_date = db.Column(db.DateTime, nullable=False)
 
     def __repr__(self):
         return f"<ServiceRequest {self.id} from User {self.user_id} to Freelancer {self.freelancer_id}>"
