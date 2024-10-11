@@ -36,7 +36,6 @@ export default {
   },
   template: `
             <div class="row">
-                <div class="col-lg-6 pb-5" style="height:100vh;background:url('static/img/renaissance.jpg');background-size:cover;"></div>
                 <div class="col-lg-6">
                     <div class="row justify-content-center">
                         <div class="col-lg-6">

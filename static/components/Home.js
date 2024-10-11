@@ -159,9 +159,6 @@
 //   components: { Book, BookDetailsModal },
 // };
 
-import Book from "./Partials/Book.js";
-import BookDetailsModal from "./Partials/BookDetailsModal.js";
-
 export default {
   data: () => ({
     showModal: false,
@@ -318,5 +315,4 @@ export default {
         </div>
     </div>
   `,
-  components: { Book, BookDetailsModal },
 };

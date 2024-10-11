@@ -1,16 +1,6 @@
 import Home from "./components/Home.js";
 import Login from "./components/Login.js";
 import Register from "./components/Register.js";
-import LibrarianLogin from "./components/LibrarianLogin.js";
-import AllBooks from "./components/AllBooks.js";
-import AllSections from "./components/AllSections.js";
-import BookRequests from "./components/BookRequests.js";
-import ReadBook from "./components/ReadBook.js";
-import SearchResult from "./components/SearchResult.js";
-import ViewSection from "./components/ViewSection.js";
-import EditBook from "./components/EditBook.js";
-import AdminStat from "./components/AdminStat.js";
-import MyRequests from "./components/MyRequests.js";
 import FreelancerRegister from "./components/FreelancerRegister.js";
 import FreelancerLogin from "./components/FreelancerLogin.js";
 import AdminLogin from "./components/AdminLogin.js";
@@ -20,7 +10,6 @@ const routes = [
   { path: "/", component: Home, name: "Home" },
   { path: "/user-login", component: Login, name: "Login" },
   { path: "/user-register", component: Register, name: "Register" },
-  { path: "/lib-login", component: LibrarianLogin, name: "LibrarianLogin" },
   {
     path: "/freelancer-register",
     component: FreelancerRegister,
@@ -46,15 +35,6 @@ const routes = [
     component: Dashboard,
     name: "Dashboard",
   },
-  { path: "/books", component: AllBooks, name: "AllBooks" },
-  { path: "/sections", component: AllSections, name: "AllSection" },
-  { path: "/requests", component: BookRequests, name: "BookRequests" },
-  { path: "/read/:id", component: ReadBook, name: "ReadBook" },
-  { path: "/section/:id", component: ViewSection, name: "ViewSection" },
-  { path: "/edit-book/:id", component: EditBook, name: "EditBook" },
-  { path: "/search-result", component: SearchResult, name: "SearchResult" },
-  { path: "/admin-stat", component: AdminStat, name: "AdminStat" },
-  { path: "/my-requests", component: MyRequests, name: "MyRequests" },
 ];
 
 const router = new VueRouter({
