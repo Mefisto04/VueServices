@@ -83,8 +83,10 @@ export default {
         const data = await res.json();
         if (res.ok) {
           localStorage.setItem("auth-token", data.token);
-          // localStorage.setItem("role", data.role);
+          localStorage.setItem("userId", data.userId);
+          localStorage.setItem("name", data.name);
           this.$router.push({ path: "/" });
+          console.log("User ID saved to local storage:", data.userId);
         } else {
           this.error = data.message;
         }

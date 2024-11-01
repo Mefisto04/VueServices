@@ -1,5 +1,5 @@
 from main import app
-from application.models import db, Role, User, Freelancer, RolesUsers, Admin, ServiceRequest
+from application.models import db, Role, User, Freelancer, RolesUsers, Admin, ServiceRequest, Feedback
 from flask_security import hash_password
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash
@@ -22,7 +22,7 @@ with app.app_context():
         admin_user = Admin(
             name="Admin User",
             email="admin@gmail.com",
-            password=generate_password_hash("12354678"),
+            password=generate_password_hash("12345678"),
             active=True,
             fs_uniquifier="admin_unique_identifier"
         )
@@ -33,9 +33,7 @@ with app.app_context():
 
     # Create freelancer users
     freelancers = [
-        {"name": "Freelancer One", "email": "freelancer1@gmail.com", "experience": "5 years in web development", "portfolio_url": "https://portfolio-one.com", "fs_uniquifier": "freelancer1_unique_identifier"},
-        # {"name": "Freelancer Two", "email": "freelancer2@gmail.com", "experience": "3 years in graphic design", "portfolio_url": "https://portfolio-two.com", "fs_uniquifier": "freelancer2_unique_identifier"},
-        # {"name": "Freelancer Three", "email": "freelancer3@gmail.com", "experience": "7 years in app development", "portfolio_url": "https://portfolio-three.com", "fs_uniquifier": "freelancer3_unique_identifier"}
+        {"name": "Freelancer One", "email": "freelancer1@gmail.com", "experience": "5 years in web development", "portfolio_url": "https://portfolio-one.com", "fs_uniquifier": "freelancer1@gmail.com"},
     ]
 
     for freelancer_data in freelancers:
@@ -53,13 +51,12 @@ with app.app_context():
             db.session.commit()
             # Associate freelancer with the freelancer role
             db.session.add(RolesUsers(user_id=freelancer.id, role_id=role_freelancer.id))
+
     db.session.commit()
 
     # Create member users
     members = [
-        {"name": "User 1", "email": "user1@gmail.com", "fs_uniquifier": "stud1_unique_identifier"},
-        # {"name": "User 2", "email": "user2@gmail.com", "fs_uniquifier": "stud2_unique_identifier"},
-        # {"name": "User 3", "email": "user3@gmail.com", "fs_uniquifier": "stud3_unique_identifier"}
+        {"name": "User 1", "email": "user1@gmail.com", "fs_uniquifier": "user1@gmail.com"},
     ]
 
     for member_data in members:
@@ -75,18 +72,15 @@ with app.app_context():
             db.session.commit()
             # Associate member with the member role
             db.session.add(RolesUsers(user_id=student.id, role_id=role_member.id))
+
     db.session.commit()
 
     # Create Service Requests
     user1 = db.session.query(User).filter_by(email="user1@gmail.com").first()
     freelancer1 = db.session.query(Freelancer).filter_by(email="freelancer1@gmail.com").first()
-    # freelancer2 = db.session.query(Freelancer).filter_by(email="freelancer2@gmail.com").first()
 
     service_date1 = datetime.now() + timedelta(days=3)
     service_date1 = service_date1.replace(hour=10, minute=0)
-
-    service_date2 = datetime.now() + timedelta(days=5)
-    service_date2 = service_date2.replace(hour=14, minute=0)
 
     if user1 and freelancer1:
         service_request1 = ServiceRequest(
@@ -97,14 +91,17 @@ with app.app_context():
         )
         db.session.add(service_request1)
 
-    # if user1 and freelancer2:
-    #     service_request2 = ServiceRequest(
-    #         user_id=user1.id,
-    #         freelancer_id=freelancer2.id,
-    #         status="pending",
-    #         service_date=service_date2
-    #     )
-    #     db.session.add(service_request2)
+        # Add feedback
+        feedback = Feedback(
+            user_id=user1.id,
+            freelancer_id=freelancer1.id,
+            rating=8,  # Example rating
+            comments="Great service!"  # Example comments
+        )
+        db.session.add(feedback)
+        db.session.commit()  # Commit the feedback to the database
 
-    # Commit the transaction
+        # Update freelancer's average rating
+        freelancer1.update_rating()  # This method should compute the average rating from feedback
+
     db.session.commit()

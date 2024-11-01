@@ -91,12 +91,11 @@ export default {
           },
           body: JSON.stringify(this.user),
         });
-        const data = await res.json(); // This will throw an error if the response is not JSON
+        const data = await res.json();
 
         if (res.ok) {
-          localStorage.setItem("user-id", data.user_id);
+          localStorage.setItem("userId", data.userId); // Use "userId" consistently
           localStorage.setItem("auth-token", data.token);
-          localStorage.setItem("role", data.role);
           this.$router.push({ path: "/" });
         } else {
           this.error = data.message || "An error occurred";
