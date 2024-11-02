@@ -6,6 +6,7 @@ import FreelancerLogin from "./components/FreelancerLogin.js";
 import AdminLogin from "./components/AdminLogin.js";
 import Admin from "./components/Admin.js";
 import Dashboard from "./components/Dashboard.js";
+import Landing from "./components/Landing.js";
 const routes = [
   { path: "/", component: Home, name: "Home" },
   { path: "/user-login", component: Login, name: "Login" },
@@ -35,6 +36,11 @@ const routes = [
     component: Dashboard,
     name: "Dashboard",
   },
+  {
+    path: "/landing",
+    component: Landing,
+    name: "Landing",
+  },
 ];
 
 const router = new VueRouter({
@@ -52,6 +58,7 @@ router.beforeEach((to, from, next) => {
     "AdminLogin",
     "Admin",
     "Dashboard",
+    "Landing",
   ];
   if (loginPages.includes(to.name)) {
     if (isLoggedIn) {

@@ -33,7 +33,10 @@ with app.app_context():
 
     # Create freelancer users
     freelancers = [
-        {"name": "Freelancer One", "email": "freelancer1@gmail.com", "experience": "5 years in web development", "portfolio_url": "https://portfolio-one.com", "fs_uniquifier": "freelancer1@gmail.com"},
+        {"name": "Freelancer One", "email": "freelancer1@gmail.com","service":"Cleaning", "experience": "5 years in web development", "portfolio_url": "https://portfolio-one.com", "fs_uniquifier": "freelancer1@gmail.com", "is_approved": True},
+        {"name": "Freelancer Two", "email": "freelancer2@gmail.com","service":"Gardening", "experience": "3 years in graphic design", "portfolio_url": "https://portfolio-two.com", "fs_uniquifier": "freelancer2@gmail.com", "is_approved": False},
+        {"name": "Freelancer Three", "email": "freelancer3@gmail.com","service":"Plumbing", "experience": "6 years in digital marketing", "portfolio_url": "https://portfolio-three.com", "fs_uniquifier": "freelancer3@gmail.com", "is_approved": True},
+        {"name": "Freelancer Four", "email": "freelancer4@gmail.com","service":"Handyman", "experience": "4 years in content writing", "portfolio_url": "https://portfolio-four.com", "fs_uniquifier": "freelancer4@gmail.com", "is_approved": False}
     ]
 
     for freelancer_data in freelancers:
@@ -42,9 +45,11 @@ with app.app_context():
                 name=freelancer_data["name"],
                 email=freelancer_data["email"],
                 password=generate_password_hash("12345678"),
+                service=freelancer_data["service"],
                 experience=freelancer_data["experience"],
                 portfolio_url=freelancer_data["portfolio_url"],
                 active=True,
+                is_approved=freelancer_data["is_approved"],
                 fs_uniquifier=freelancer_data["fs_uniquifier"]
             )
             db.session.add(freelancer)

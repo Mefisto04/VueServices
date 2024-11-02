@@ -4,9 +4,20 @@ export default {
       email: "",
       name: "",
       password: "",
+      service: "",
       experience: "", // Added experience field
       portfolio_url: "", // Added portfolio URL field
     },
+    services: [
+      "Cleaning",
+      "Gardening",
+      "Plumbing",
+      "Electrical Work",
+      "Handyman",
+      "Painting",
+      "Moving",
+      "Others",
+    ],
     error: "",
   }),
   methods: {
@@ -22,7 +33,12 @@ export default {
           const data = await res.json();
           if (res.ok) {
             localStorage.setItem("auth-token", data.token);
+            localStorage.setItem("freelancerId", data.freelancerId);
             localStorage.setItem("role", data.role);
+            localStorage.setItem("name", this.freelancer.name);
+            localStorage.setItem("email", this.freelancer.email);
+            localStorage.setItem("experience", this.freelancer.experience);
+            localStorage.setItem("portfolioUrl", this.freelancer.portfolio_url);
             this.$router.push({ path: "/dashboard" });
           } else {
             this.error = data.message;
@@ -63,6 +79,14 @@ export default {
                                 <div class="form-group">
                                     <label>Portfolio URL</label>
                                     <input type="url" v-model="freelancer.portfolio_url" class="form-control" placeholder="Your portfolio URL..." />
+                                </div>
+                                 <div class="form-group">
+                                    <label>Services Offered</label>
+                                    <select v-model="freelancer.service" class="form-control">
+                                        <option v-for="service in services" :key="service" :value="service">
+                                            {{ service }}
+                                        </option>
+                                    </select>
                                 </div>
                                 <div class="form-group mt-3">
                                     <button class="btn btn-dark" @click="register">

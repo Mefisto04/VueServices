@@ -35,7 +35,10 @@ def get_freelancers():
             "name": f.name,
             "email": f.email,
             "experience": f.experience,
-            "portfolio_url": f.portfolio_url
+            "portfolio_url": f.portfolio_url,
+            "rating": f.rating,
+            "service": f.service,
+            "is_approved": f.is_approved
         } for f in freelancers
     ]
     return jsonify(freelancer_list)  # Return the list of freelancers as JSON
@@ -65,15 +68,56 @@ def delete_user(user_id):
 def get_admin_data():
     users = User.query.all()
     freelancers = Freelancer.query.all()
-
-    users_data = [{'id': user.id, 'name': user.name, 'email': user.email, 'active': user.active} for user in users]
-    freelancers_data = [{'id': freelancer.id, 'name': freelancer.name, 'email': freelancer.email, 'active': freelancer.active} for freelancer in freelancers]
+    
+    # Fetch only the unapproved freelancers as requests
+    unapproved_freelancers = Freelancer.query.filter_by(is_approved=False).all()
+    
+    users_data = [
+        {'id': user.id, 'name': user.name, 'email': user.email, 'active': user.active}
+        for user in users
+    ]
+    
+    freelancers_data = [
+        {'id': freelancer.id, 'name': freelancer.name, 'email': freelancer.email,
+         'service': freelancer.service, 'experience': freelancer.experience,
+          'active': freelancer.active}
+        for freelancer in freelancers
+    ]
+    
+    freelancer_requests = [
+        {
+            'id': f.id,
+            'name': f.name,
+            'email': f.email,
+            'service': f.service,
+            'experience': f.experience,
+            'portfolio_url': f.portfolio_url,
+        } for f in unapproved_freelancers
+    ]
 
     return jsonify({
         'users': users_data,
-        'freelancers': freelancers_data
+        'freelancers': freelancers_data,
+        'freelancerRequests': freelancer_requests
     })
 
+@app.route('/api/freelancer/<int:freelancer_id>/approve', methods=['POST'])
+def approve_freelancer(freelancer_id):
+    # Fetch the freelancer by ID
+    freelancer = Freelancer.query.get(freelancer_id)
+    
+    # Check if the freelancer exists
+    if not freelancer:
+        return jsonify({"message": "Freelancer not found"}), 404
+    
+    # Update the is_approved field
+    freelancer.is_approved = True
+    
+    # Commit the changes to the database
+    db.session.commit()
+    
+    # Return a success message
+    return jsonify({"message": "Freelancer approved successfully"}), 200
 
 
 if __name__ == '__main__':

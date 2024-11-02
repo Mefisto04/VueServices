@@ -95,6 +95,7 @@ def freelancer_register():
     password = data.get('password')
     experience = data.get('experience', '')
     portfolio_url = data.get('portfolio_url', '')
+    service = data.get('service', '')
 
     if not email or not name or not password or not experience:
         return jsonify({"message": "All fields are required"}), 400
@@ -109,7 +110,9 @@ def freelancer_register():
         password=generate_password_hash(password),
         experience=experience,
         portfolio_url=portfolio_url,
+        service=service,
         active=True,
+        is_approved=False,
         fs_uniquifier=email
     )
 
@@ -117,7 +120,15 @@ def freelancer_register():
 
     try:
         db.session.commit()
-        return jsonify({"email": freelancer.email, "role": "freelancer"}), 201
+        return jsonify({
+            "token": freelancer.get_auth_token(),
+            "freelancerId": freelancer.fs_uniquifier,
+            "name": freelancer.name,
+            "email": freelancer.email, 
+            "experience": freelancer.experience,
+            "portfolioUrl": freelancer.portfolio_url,
+            "role": "freelancer"
+        }), 201
     except Exception as e:
         db.session.rollback()
         app.logger.error(f"Error during registration: {str(e)}")
@@ -145,6 +156,10 @@ def freelancer_login():
     # Check if the freelancer's account is active
     if not freelancer.active:
         return jsonify({"message": "Account is not active"}), 403
+    
+    if not freelancer.active:
+        return jsonify({"message": "Account is not active"}), 403
+
 
     # Verify the password
     if check_password_hash(freelancer.password, password):
@@ -188,7 +203,6 @@ def admin_login():
     if not admin.active:
         return jsonify({"message": "Account is not active"}), 403
 
-    # Debug the stored hashed password
     print("Stored hash:", admin.password)  # Log the hashed password from the database
     print("Provided password:", password)   # Log the provided password
 

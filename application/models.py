@@ -36,11 +36,13 @@ class Freelancer(db.Model, UserMixin):
     name = db.Column(db.String(30))
     email = db.Column(db.String(), unique=True)
     password = db.Column(db.String(255))
+    service = db.Column(db.String(255))
     experience = db.Column(db.String(255))  # New field for experience
     portfolio_url = db.Column(db.String(255))  # New field for portfolio URL
     active = db.Column(db.Boolean())
     fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
     rating = db.Column(db.Float, default=0)
+    is_approved = db.Column(db.Boolean, default=False)
 
     def update_rating(self):
         feedbacks = Feedback.query.filter_by(freelancer_id=self.id).all()
