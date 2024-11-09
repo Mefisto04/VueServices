@@ -34,6 +34,7 @@ def get_freelancers():
             "id": f.id,
             "name": f.name,
             "email": f.email,
+            "location": f.location,
             "experience": f.experience,
             "portfolio_url": f.portfolio_url,
             "rating": f.rating,
@@ -80,6 +81,7 @@ def get_admin_data():
     freelancers_data = [
         {'id': freelancer.id, 'name': freelancer.name, 'email': freelancer.email,
          'service': freelancer.service, 'experience': freelancer.experience,
+         'location': freelancer.location,
           'active': freelancer.active}
         for freelancer in freelancers
     ]

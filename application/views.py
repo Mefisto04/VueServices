@@ -169,7 +169,8 @@ def freelancer_login():
             "name": freelancer.name,
             "experience": freelancer.experience,
             "portfolioUrl": freelancer.portfolio_url,
-            "role": "freelancer"
+            "role": "freelancer",
+            "is_approved": freelancer.is_approved
         }), 200
     else:
         return jsonify({"message": "Incorrect Password"}), 400

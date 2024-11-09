@@ -36,6 +36,7 @@ class Freelancer(db.Model, UserMixin):
     name = db.Column(db.String(30))
     email = db.Column(db.String(), unique=True)
     password = db.Column(db.String(255))
+    location = db.Column(db.String(255))  
     service = db.Column(db.String(255))
     experience = db.Column(db.String(255))  # New field for experience
     portfolio_url = db.Column(db.String(255))  # New field for portfolio URL

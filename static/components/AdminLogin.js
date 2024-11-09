@@ -33,7 +33,7 @@ export default {
     },
   },
   template: `
-            <div class="row">
+            <div class="container d-flex align-items-center justify-content-center" style="height: 100vh;">
                 <div class="col-lg-6 pb-5" style="height:100vh;background:url('static/img/reading-book-bw.jpg') center;background-size:cover;">
                 </div>
                 <div class="col-lg-6">

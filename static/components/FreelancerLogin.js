@@ -21,13 +21,28 @@ export default {
         const data = await res.json();
 
         if (res.ok) {
-          console.log("Login successful:", data);
-          localStorage.setItem("freelancerId", data.freelancerId);
-          localStorage.setItem("name", data.name);
-          localStorage.setItem("experience", data.experience);
-          localStorage.setItem("portfolioUrl", data.portfolioUrl);
+          if (data.is_approved) {
+            console.log("Login successful:", data);
+            localStorage.setItem("freelancerId", data.freelancerId);
+            localStorage.setItem("name", data.name);
+            localStorage.setItem("experience", data.experience);
+            localStorage.setItem("portfolioUrl", data.portfolioUrl);
 
-          this.$router.push({ path: "/dashboard" });
+            this.$router.push({ path: "/dashboard" });
+          } else {
+            console.log(
+              "Account is yet to be approved by admin. Please wait:",
+              data.message
+            );
+            this.error =
+              "Your account is not yet approved by the admin. Please wait for approval.";
+          }
+        } else if (data.is_approved == false) {
+          console.log(
+            "Account is yet to be approved by admin, Please wait:",
+            data.message
+          );
+          this.error = data.message;
         } else {
           console.log("Login failed:", data.message);
           this.error = data.message;
@@ -39,7 +54,7 @@ export default {
     },
   },
   template: `
-    <div class="row">
+    <div class="container d-flex align-items-center justify-content-center" style="height: 100vh;">
       <div class="col-lg-6">
         <div class="row justify-content-center">
           <div class="col-lg-6">

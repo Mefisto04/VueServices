@@ -77,6 +77,10 @@ export default {
                                     <input type="text" v-model="freelancer.experience" class="form-control" placeholder="Your experience..." />
                                 </div>
                                 <div class="form-group">
+                                    <label>Location</label>
+                                    <input type="text" v-model="freelancer.location" class="form-control"/>
+                                </div>
+                                <div class="form-group">
                                     <label>Portfolio URL</label>
                                     <input type="url" v-model="freelancer.portfolio_url" class="form-control" placeholder="Your portfolio URL..." />
                                 </div>

@@ -94,3 +94,31 @@
   align-items: center;
   gap: 30px;
 }
+.navbar {
+  background-color: #a8d3ff;
+  display: flex;
+  justify-content: space-between;
+}
+
+
+.nav-link {
+  transition: color 0.3s;
+}
+
+.nav-link:hover {
+  color: #5e0797; /* Change link color on hover */
+}
+
+.btn-outline-dark {
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-outline-dark:hover {
+  background-color: #5e0797; /* Change button background on hover */
+  color: white; /* Change button text color on hover */
+}
+.container-fluid{
+  display: flex;
+  justify-content: space-around;
+  gap: 20px;
+}

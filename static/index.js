@@ -4,11 +4,9 @@ import NavBar from "./components/NavBar.js";
 new Vue({
   el: "#app",
   template: `
-    <div class="bg-dark">
-      <div class="container">
+    <div class="">
         <NavBar :key='has_changed'/>
         <router-view class=""/>
-      </div>
     </div>
 `,
   router,
