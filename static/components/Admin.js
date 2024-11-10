@@ -52,7 +52,34 @@ export default {
           console.error("Error approving freelancer:", error);
         });
     },
+    async updateFreelancer(freelancerId, service) {
+      try {
+        const res = await fetch("/update_freelancer_by_admin", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            freelancerId: freelancerId, // Pass freelancerId
+            service: service, // Pass service
+          }),
+        });
 
+        const data = await res.json();
+
+        if (res.ok) {
+          this.success = "Profile updated successfully!";
+          localStorage.setItem("service", service);
+          this.getAdminData(); // Refresh data to reflect the change
+          alert("Profile updated successfully!");
+        } else {
+          this.error = data.message;
+        }
+      } catch (error) {
+        this.error =
+          "An error occurred while updating the profile. Please try again.";
+      }
+    },
     deleteUser(userId) {
       fetch(`/api/user/${userId}`, {
         method: "DELETE",
@@ -105,6 +132,11 @@ export default {
   },
   template: `
         <div class="px-3 mt-3 pb-5">
+          <div>
+            <button @click="$router.push('/admin-analytics')" class="btn btn-primary">
+              View Analytics
+            </button>
+          </div>
           <h3>Admin Dashboard</h3>
           <h3>Users</h3>
           <table class="table">
@@ -138,9 +170,17 @@ export default {
                   <h5 class="card-title">{{ freelancer.name }}</h5>
                   <p class="card-text">Email: {{ freelancer.email }}</p>
                   <p class="card-text">Service: {{ freelancer.service }}</p>
+                  <p class="card-text">Rating: {{ freelancer.rating }}</p>
                   <p class="card-text">Experience: {{ freelancer.experience }}</p>
                   <a v-if="freelancer.portfolio_url && freelancer.portfolio_url !== 'null'" 
                      :href="freelancer.portfolio_url" class="btn btn-primary" target="_blank">View Portfolio</a>
+                  <form @submit.prevent="updateFreelancer( freelancer.email , freelancer.service)">
+                    <div class="form-group">
+                      <label for="service">Service</label>
+                      <input v-model="freelancer.service" type="text" class="form-control" id="service" placeholder="Enter Service" required>
+                    </div>
+                    <button type="submit" class="btn btn-dark mt-3">Update</button>
+                  </form>
                   <button @click="deleteFreelancer(freelancer.id)" class="btn btn-danger btn-sm mt-2">Delete</button>
                 </div>
               </div>

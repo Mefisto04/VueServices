@@ -7,6 +7,7 @@ import AdminLogin from "./components/AdminLogin.js";
 import Admin from "./components/Admin.js";
 import Dashboard from "./components/Dashboard.js";
 import Landing from "./components/Landing.js";
+import AdminAnalytics from "./components/AdminAnalytics.js";
 const routes = [
   { path: "/", component: Home, name: "Home" },
   { path: "/user-login", component: Login, name: "Login" },
@@ -41,6 +42,11 @@ const routes = [
     component: Landing,
     name: "Landing",
   },
+  {
+    path: "/admin-analytics",
+    component: AdminAnalytics,
+    name: "AdminAnalytics",
+  },
 ];
 
 const router = new VueRouter({
@@ -59,6 +65,7 @@ router.beforeEach((to, from, next) => {
     "Admin",
     "Dashboard",
     "Landing",
+    "AdminAnalytics",
   ];
   if (loginPages.includes(to.name)) {
     if (isLoggedIn) {

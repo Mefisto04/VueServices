@@ -80,6 +80,7 @@ def get_admin_data():
     
     freelancers_data = [
         {'id': freelancer.id, 'name': freelancer.name, 'email': freelancer.email,
+            'rating': freelancer.rating, 
          'service': freelancer.service, 'experience': freelancer.experience,
          'location': freelancer.location,
           'active': freelancer.active}

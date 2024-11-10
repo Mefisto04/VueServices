@@ -81,10 +81,6 @@ export default {
           </template>
         </ul>
       </div>
-      <form class="d-flex" role="search" v-if="isLoggedIn">
-        <input class="form-control me-2" type="search" placeholder="Search freelancers..." v-model="searchValue" aria-label="Search">
-        <button type="button" class="btn btn-outline-dark" @click="search">Search</button>
-      </form>
     </div>
   </nav>
 </div>`,

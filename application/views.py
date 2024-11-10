@@ -9,6 +9,8 @@ from flask_restful import marshal, fields
 from .models import User, db, Freelancer,Admin,ServiceRequest,Feedback
 from .sec import datastore
 from flask_cors import CORS
+from sqlalchemy import func
+from sqlalchemy.exc import SQLAlchemyError
 
 CORS(app)
 # from .sec import datastore
@@ -164,6 +166,7 @@ def freelancer_login():
     # Verify the password
     if check_password_hash(freelancer.password, password):
         return jsonify({
+            # "token": freelancer.get_auth_token(),
             "email": freelancer.email,
             "freelancerId": freelancer.fs_uniquifier,
             "name": freelancer.name,
@@ -210,6 +213,7 @@ def admin_login():
     # Check password
     if check_password_hash(admin.password, password):
         return jsonify({
+            # "token": admin.get_auth_token(),
             "email": admin.email,
             "adminId": admin.id,
             "name": admin.name,
@@ -255,6 +259,33 @@ def update_freelancer():
         app.logger.error(f"Error updating freelancer: {str(e)}")
         return jsonify({"message": "Error occurred during update"}), 400
     
+@app.route('/update_freelancer_by_admin', methods=['POST'])
+def update_freelancer_by_admin():
+    data = request.get_json()
+    app.logger.debug(f"Received data for update: {data}")
+
+    freelancer_id = data.get('freelancerId')
+    service = data.get('service')
+
+    freelancer = Freelancer.query.filter_by(fs_uniquifier=freelancer_id).first()
+
+    if not freelancer:
+        return jsonify({"message": "Freelancer not found"}), 404
+
+    freelancer.service = service
+
+    try:
+        db.session.commit()
+        return jsonify({
+            "message": "Freelancer profile updated successfully",
+            "service": freelancer.service
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error updating freelancer: {str(e)}")
+        return jsonify({"message": "Error occurred during update"}), 400
+
+
 @app.route('/api/request-service', methods=['POST'])
 def request_service():
     data = request.get_json()
@@ -309,12 +340,14 @@ def request_service():
         db.session.rollback()
         return jsonify({'error': 'An error occurred while creating the service request'}), 500
 
+
+
 @app.route('/api/request-service/<int:request_id>', methods=['PUT'])
 def update_service_request(request_id):
     data = request.get_json()
     status = data.get('status')
 
-    if status not in ['accepted', 'rejected']:
+    if status not in ['accepted', 'rejected','completed']:
         return jsonify({'error': 'Invalid status'}), 400
 
     service_request = ServiceRequest.query.get_or_404(request_id)
@@ -326,6 +359,39 @@ def update_service_request(request_id):
         'service_request_id': service_request.id,
         'status': service_request.status
     }), 200
+
+@app.route('/api/request-service-by-user/<int:request_id>', methods=['PUT'])
+def update_service_request_by_user(request_id):
+    data = request.get_json()
+    service_date = data.get('service_date')
+
+    if not service_date:
+        return jsonify({'error': 'Service date is required'}), 400
+
+    # Fetch the service request by ID
+    service_request = ServiceRequest.query.get_or_404(request_id)
+    
+    # Check if the service request is in 'pending' status
+    if service_request.status != 'pending':
+        return jsonify({'error': 'Service date can only be updated for pending requests'}), 400
+
+    try:
+        # Parse the service date and update
+        service_request.service_date = datetime.strptime(service_date, '%Y-%m-%dT%H:%M')
+        db.session.commit()
+
+        return jsonify({
+            'message': 'Service request updated successfully',
+            'service_request_id': service_request.id,
+            'service_date': service_request.service_date.isoformat()
+        }), 200
+
+    except ValueError:
+        return jsonify({'error': 'Invalid service date format. Expected format is YYYY-MM-DDTHH:MM'}), 400
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'An error occurred while updating the service request'}), 500
 
 
 
@@ -409,3 +475,41 @@ def submit_feedback():
         'feedback_id': new_feedback.id
     }), 201
 
+
+@app.route('/admin/analytics', methods=['GET'])
+@auth_required('admin')
+def get_analytics_data():
+    try:
+        top_freelancers = (
+            db.session.query(Freelancer.name, func.avg(Feedback.rating).label("rating"))
+            .join(Feedback)
+            .group_by(Freelancer.id)
+            .order_by(func.avg(Feedback.rating).desc())
+            .limit(5)
+            .all()
+        )
+
+        most_booked_services = (
+            db.session.query(ServiceRequest.service, func.count(ServiceRequest.id).label("count"))
+            .join(Freelancer)
+            .group_by(ServiceRequest.service)
+            .order_by(func.count(ServiceRequest.id).desc())
+            .all()
+        )
+
+        users_count = db.session.query(User).count()
+        freelancers_count = db.session.query(Freelancer).count()
+
+        return jsonify({
+            "topFreelancers": [{"name": f[0], "rating": f[1]} for f in top_freelancers],
+            "popularServices": [{"service": s[0], "count": s[1]} for s in most_booked_services],
+            "userCount": users_count,
+            "freelancerCount": freelancers_count
+        })
+
+    except SQLAlchemyError as e:
+        print("Database error:", str(e))
+        return jsonify({"error": "Database error occurred"}), 500
+    except Exception as e:
+        print("An error occurred:", str(e))
+        return jsonify({"error": "An unexpected error occurred"}), 500
