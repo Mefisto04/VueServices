@@ -244,8 +244,6 @@ export default {
       this.editServiceDate = currentServiceDate;
       this.editRequestId = requestId;
     },
-
-    // Function to send updated service date to the backend
     updateServiceRequestDate() {
       const updatedRequestPayload = {
         service_date: this.editServiceDate,
@@ -312,6 +310,68 @@ export default {
           alert("Error submitting service date: " + error.message);
         });
     },
+
+    getUserDashboard() {
+      const userId = localStorage.getItem("userId");
+      console.log("User ID:", userId);
+      if (!userId) {
+        console.error("User ID is not available.");
+        return;
+      }
+
+      fetch(`/api/user_dashboard/${userId}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("auth-token")}`, // Authentication token
+        },
+      })
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error("Failed to fetch user dashboard data");
+          }
+          return res.json();
+        })
+        .then((data) => {
+          this.userDashboard = data; // Store the response data in the userDashboard
+          console.log("User Dashboard Data:", data);
+        })
+        .catch((error) => {
+          console.error("Error fetching user dashboard:", error);
+        });
+    },
+
+    // Existing method to filter freelancers based on search, service, location, and rating
+    filterFreelancers() {
+      this.filteredFreelancerList = this.freelancerList.filter((freelancer) => {
+        const matchesService =
+          !this.selectedService || freelancer.service === this.selectedService;
+        const matchesLocation =
+          !this.selectedLocation ||
+          freelancer.location === this.selectedLocation;
+        const matchesRating =
+          !this.selectedRating || freelancer.rating >= this.selectedRating;
+        const matchesSearch =
+          !this.searchQuery ||
+          freelancer.name
+            .toLowerCase()
+            .includes(this.searchQuery.toLowerCase()) ||
+          freelancer.location
+            .toLowerCase()
+            .includes(this.searchQuery.toLowerCase()) ||
+          freelancer.service
+            .toLowerCase()
+            .includes(this.searchQuery.toLowerCase());
+
+        return (
+          matchesService && matchesLocation && matchesRating && matchesSearch
+        );
+      });
+    },
+
+    // Button action to log user details
+    logUserDetails() {
+      console.log("User Dashboard Details:", this.userDashboard);
+    },
   },
   created() {
     this.getAllFreelancers();
@@ -319,6 +379,7 @@ export default {
   },
   template: `
     <div class="px-3 mt-3 pb-5">
+      <button class="btn btn-primary mt-3" @click="getUserDashboard">Get User Dashboard</button>
       <div class="modal" v-if="showEditModal">
         <div class="modal-content">
           <h4>Edit Service Date</h4>
@@ -357,7 +418,25 @@ export default {
         </div>
       </div>
 
+      <h3>Accepted Services</h3>
+      <div class="row">
+        <div class="col-lg-4" v-for="request in serviceRequests" :key="request.id" v-if="request.status === 'accepted'">
+          <div class="card">
+            <div class="card-body">
+              <h5>Freelancer ID: {{ request.freelancer_id }}</h5>
+              <p>Service Date: {{ new Date(request.service_date).toLocaleDateString() }}</p>
+              <p>Status: {{ request.status }}</p>
+              <button
+                class="btn btn-success mt-2"
+                @click="updateRequestStatus(request.id, 'completed')"
+              >
+                Mark as Completed
+              </button>
 
+            </div>
+          </div>
+        </div>
+      </div>
 
       <h3 class="mb-4">Past Services</h3>
       <div class="row">
@@ -374,6 +453,9 @@ export default {
       </div>
 
       <hr/>
+
+      
+
 
       <!-- Feedback Form -->
       <div v-if="showFeedback" class="feedback-form">

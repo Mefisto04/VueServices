@@ -1,115 +1,72 @@
 export default {
-  data: () => ({
-    analyticsData: {
+  data() {
+    return {
       topFreelancers: [],
       popularServices: [],
-      userCount: 0,
-      freelancerCount: 0,
-    },
-    charts: {},
-  }),
+      userCounts: { user_count: 0, freelancer_count: 0 },
+    };
+  },
   methods: {
     async fetchAnalyticsData() {
       try {
-        const res = await fetch("/admin/analytics", { method: "GET" });
-        if (!res.ok) throw new Error(`Error fetching analytics: ${res.status}`);
+        const freelancerResponse = await fetch("/api/top-rated-freelancers");
+        this.topFreelancers = await freelancerResponse.json();
 
-        const contentType = res.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          throw new Error("Response is not JSON");
-        }
+        const servicesResponse = await fetch("/api/most-booked-services");
+        this.popularServices = await servicesResponse.json();
 
-        const data = await res.json();
-        this.analyticsData = data;
-        this.initializeCharts();
+        const countsResponse = await fetch("/api/user-freelancer-counts");
+        this.userCounts = await countsResponse.json();
       } catch (error) {
-        console.error("Error fetching analytics:", error);
+        console.error("Error fetching analytics data:", error);
       }
     },
-    initializeCharts() {
-      Object.values(this.charts).forEach((chart) => chart.destroy());
-
-      // Top freelancers bar chart
-      this.charts.topFreelancersChart = new Chart(
-        document.getElementById("topFreelancersChart"),
-        {
-          type: "bar",
-          data: {
-            labels: this.analyticsData.topFreelancers.map((f) => f.name),
-            datasets: [
-              {
-                label: "Rating",
-                data: this.analyticsData.topFreelancers.map((f) => f.rating),
-                backgroundColor: "#4caf50",
-              },
-            ],
-          },
-        }
-      );
-
-      // Popular services bar chart
-      this.charts.popularServicesChart = new Chart(
-        document.getElementById("popularServicesChart"),
-        {
-          type: "bar",
-          data: {
-            labels: this.analyticsData.popularServices.map((s) => s.service),
-            datasets: [
-              {
-                label: "Bookings",
-                data: this.analyticsData.popularServices.map((s) => s.count),
-                backgroundColor: "#42a5f5",
-              },
-            ],
-          },
-        }
-      );
-
-      // User and freelancer count doughnut chart
-      this.charts.userFreelancerCountChart = new Chart(
-        document.getElementById("userFreelancerCountChart"),
-        {
-          type: "doughnut",
-          data: {
-            labels: ["Users", "Freelancers"],
-            datasets: [
-              {
-                label: "Counts",
-                data: [
-                  this.analyticsData.userCount,
-                  this.analyticsData.freelancerCount,
-                ],
-                backgroundColor: ["#ffca28", "#8e24aa"],
-              },
-            ],
-          },
-        }
-      );
+    downloadCSV() {
+      // Trigger the download by creating a temporary link
+      const link = document.createElement("a");
+      link.href = "/api/export-completed-services"; // The route that generates the CSV
+      link.download = "completed_services.csv"; // Filename for the downloaded file
+      link.click();
     },
   },
   created() {
     this.fetchAnalyticsData();
   },
-  beforeDestroy() {
-    Object.values(this.charts).forEach((chart) => chart.destroy());
-  },
   template: `
     <div class="admin-analytics px-3 mt-3 pb-5">
       <h3>Admin Analytics Dashboard</h3>
 
-      <div>
+      <div class="mt-4">
         <h4>Top 5 Rated Freelancers</h4>
-        <canvas id="topFreelancersChart"></canvas>
+        <div class="freelancer-cards">
+          <div v-for="freelancer in topFreelancers" :key="freelancer.name" class="card mb-3 p-3 shadow-sm">
+            <h5>{{ freelancer.name }}</h5>
+            <p>Rating: {{ freelancer.rating.toFixed(1) }}</p>
+          </div>
+        </div>
       </div>
 
-      <div>
+      <div class="mt-4">
         <h4>Most Booked Services</h4>
-        <canvas id="popularServicesChart"></canvas>
+        <div class="service-cards">
+          <div v-for="service in popularServices" :key="service.service" class="card mb-3 p-3 shadow-sm">
+            <h5>{{ service.service }}</h5>
+            <p>Bookings: {{ service.count }}</p>
+          </div>
+        </div>
       </div>
 
-      <div>
+      <div class="mt-4">
         <h4>User and Freelancer Counts</h4>
-        <canvas id="userFreelancerCountChart"></canvas>
+        <div class="card p-3 shadow-sm">
+          <p><strong>Total Users:</strong> {{ userCounts.user_count }}</p>
+          <p><strong>Total Freelancers:</strong> {{ userCounts.freelancer_count }}</p>
+        </div>
+      </div>
+
+      <!-- Button to download CSV -->
+      <div class="mt-4">
+        <button @click="downloadCSV" class="btn btn-primary">Download Completed Services CSV</button>
       </div>
     </div>
   `,

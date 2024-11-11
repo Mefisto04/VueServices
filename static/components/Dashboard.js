@@ -11,6 +11,40 @@ export default {
     success: "",
   }),
   methods: {
+    async sendReminder() {
+      const freelancerId = localStorage.getItem("freelancerId");
+      if (!freelancerId) {
+        this.error = "Freelancer ID is missing. Please log in again.";
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `http://127.0.0.1:5000/api/send_reminder/${freelancerId}`, // freelancerId should be the email here
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (response.ok) {
+          this.success = "Reminder email sent successfully!";
+          console.log("Pending:", data.pending_requests);
+          console.log("Approved:", data.approved_requests);
+          console.log("Completed:", data.completed_requests);
+        } else {
+          this.error = data.error || "Failed to send reminder email.";
+        }
+      } catch (error) {
+        this.error = "An error occurred while sending the reminder email.";
+        console.error(error);
+      }
+    },
+
     async updateFreelancer() {
       const freelancerId = localStorage.getItem("freelancerId");
       console.log("Freelancer Uniquifier:", freelancerId);
@@ -99,6 +133,10 @@ export default {
       <h2 class="text-center mb-4">Freelancer Dashboard</h2>
       <div v-if="error" class="alert alert-danger">{{ error }}</div>
       <div v-if="success" class="alert alert-success">{{ success }}</div>
+
+      <button @click="sendReminder" class="btn btn-primary mb-4">
+        Send Daily Reminder
+      </button>
 
       <div class="border rounded shadow p-4 mb-4 animate__animated animate__fadeIn">
         <h3>Update Profile</h3>

@@ -11,6 +11,7 @@ from .sec import datastore
 from flask_cors import CORS
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
+from .mail_service import send_message
 
 CORS(app)
 # from .sec import datastore
@@ -463,6 +464,12 @@ def submit_feedback():
     )
     
     db.session.add(new_feedback)
+
+    service_request = ServiceRequest.query.filter_by(user_id=user.id, freelancer_id=freelancer_id).first()
+    if service_request:
+        service_request.is_completed = True  # Mark as completed once feedback is provided
+        db.session.commit() 
+
     db.session.commit()
 
     # Fetch the freelancer and update their average rating
@@ -476,40 +483,130 @@ def submit_feedback():
     }), 201
 
 
-@app.route('/admin/analytics', methods=['GET'])
-@auth_required('admin')
-def get_analytics_data():
-    try:
-        top_freelancers = (
-            db.session.query(Freelancer.name, func.avg(Feedback.rating).label("rating"))
-            .join(Feedback)
-            .group_by(Freelancer.id)
-            .order_by(func.avg(Feedback.rating).desc())
-            .limit(5)
-            .all()
-        )
+@app.route('/api/top-rated-freelancers', methods=['GET'])
+def top_rated_freelancers():
+    top_freelancers = (
+        db.session.query(Freelancer)
+        .filter(Freelancer.is_approved == True)
+        .order_by(Freelancer.rating.desc())
+        .limit(5)
+        .all()
+    )
+    top_freelancers_data = [
+        {'name': freelancer.name, 'rating': freelancer.rating} for freelancer in top_freelancers
+    ]
+    return jsonify(top_freelancers_data)
 
-        most_booked_services = (
-            db.session.query(ServiceRequest.service, func.count(ServiceRequest.id).label("count"))
-            .join(Freelancer)
-            .group_by(ServiceRequest.service)
-            .order_by(func.count(ServiceRequest.id).desc())
-            .all()
-        )
+@app.route('/api/most-booked-services', methods=['GET'])
+def most_booked_services():
+    most_booked = (
+        db.session.query(Freelancer.service, func.count(ServiceRequest.id).label("service_count"))
+        .join(ServiceRequest, ServiceRequest.freelancer_id == Freelancer.id)
+        .group_by(Freelancer.service)
+        .order_by(func.count(ServiceRequest.id).desc())
+        .limit(5)
+        .all()
+    )
+    most_booked_services_data = [{'service': service, 'count': count} for service, count in most_booked]
+    return jsonify(most_booked_services_data)
 
-        users_count = db.session.query(User).count()
-        freelancers_count = db.session.query(Freelancer).count()
+@app.route('/api/user-freelancer-counts', methods=['GET'])
+def user_freelancer_counts():
+    user_count = db.session.query(func.count(User.id)).scalar()
+    freelancer_count = db.session.query(func.count(Freelancer.id)).scalar()
+    return jsonify({'user_count': user_count, 'freelancer_count': freelancer_count})
 
+import csv
+from flask import Response
+from datetime import datetime
+
+@app.route('/api/export-completed-services', methods=['GET'])
+def export_completed_services():
+    # Query to fetch completed service requests along with user, freelancer, service details, feedback
+    completed_requests = db.session.query(
+        ServiceRequest, User, Freelancer, Feedback
+    ).join(User, User.id == ServiceRequest.user_id) \
+     .join(Freelancer, Freelancer.id == ServiceRequest.freelancer_id) \
+     .join(Feedback, Feedback.freelancer_id == Freelancer.id) \
+     .filter(ServiceRequest.is_completed == True) \
+     .all()
+
+    # Create a CSV response
+    def generate_csv():
+        # Write the CSV headers
+        yield "Service Request ID,User Name,User Email,Freelancer Name,Freelancer Email,Service Type,Freelancer Location,Rating Given,Feedback,Service Date\n"
+        
+        # Write the data rows
+        for service_request, user, freelancer, feedback in completed_requests:
+            yield f"{service_request.id},{user.name},{user.email},{freelancer.name},{freelancer.email},{freelancer.service},{freelancer.location},{feedback.rating},{feedback.comments},{service_request.service_date.strftime('%Y-%m-%d %H:%M:%S')}\n"
+
+    return Response(generate_csv(), mimetype='text/csv', headers={"Content-Disposition": "attachment;filename=completed_services.csv"})
+
+
+@app.route("/api/send_reminder/<string:freelancer_id>", methods=["POST"])
+def send_reminder(freelancer_id):
+    # Query the Freelancer by the passed freelancer_id (now treated as a string)
+    freelancer = Freelancer.query.filter_by(email=freelancer_id).first()  # Use email for matching
+
+    if freelancer:
+        # Query ServiceRequest table for this freelancer's pending, approved, and completed requests
+        pending_requests = ServiceRequest.query.filter_by(freelancer_id=freelancer.id, status="pending").count()
+        approved_requests = ServiceRequest.query.filter_by(freelancer_id=freelancer.id, status="accepted").count()
+        completed_requests = ServiceRequest.query.filter_by(freelancer_id=freelancer.id, status="completed").count()
+
+        # Print the counts to the console for testing
+        print(f"Freelancer: {freelancer.name}")
+        print(f"Pending requests: {pending_requests}")
+        print(f"Approved requests: {approved_requests}")
+        print(f"Completed requests: {completed_requests}")
+
+        # Return the response with the counts
         return jsonify({
-            "topFreelancers": [{"name": f[0], "rating": f[1]} for f in top_freelancers],
-            "popularServices": [{"service": s[0], "count": s[1]} for s in most_booked_services],
-            "userCount": users_count,
-            "freelancerCount": freelancers_count
-        })
+            "message": "Reminder sent successfully",
+            "pending_requests": pending_requests,
+            "approved_requests": approved_requests,
+            "completed_requests": completed_requests
+        }), 200
 
-    except SQLAlchemyError as e:
-        print("Database error:", str(e))
-        return jsonify({"error": "Database error occurred"}), 500
-    except Exception as e:
-        print("An error occurred:", str(e))
-        return jsonify({"error": "An unexpected error occurred"}), 500
+    return jsonify({"error": "Freelancer not found"}), 404
+
+
+@app.route("/api/user_dashboard/<string:user_id>", methods=["GET"])
+def get_user_dashboard(user_id):
+    # Query the User by the passed user_id (now treated as a string)
+    user = User.query.filter_by(email=user_id).first()  # Use user_id for matching
+    if user:
+        # Query ServiceRequest table for this user's pending, accepted, and completed requests
+        pending_requests = ServiceRequest.query.filter_by(user_id=user.id, status="pending").count()
+        accepted_requests = ServiceRequest.query.filter_by(user_id=user.id, status="accepted").count()
+        completed_requests = ServiceRequest.query.filter_by(user_id=user.id, status="completed").count()
+
+        # Query Feedback table for all feedback given by this user
+        feedbacks = Feedback.query.filter_by(user_id=user.id).all()
+        feedback_list = [
+            {
+                "freelancer_id": feedback.freelancer_id,
+                "comments": feedback.comments,
+                "created_at": feedback.created_at
+            }
+            for feedback in feedbacks
+        ]
+        
+        # Print the counts and feedback for testing (optional)
+        print(f"User: {user.name}")
+        print(f"Pending requests: {pending_requests}")
+        print(f"Accepted requests: {accepted_requests}")
+        print(f"Completed requests: {completed_requests}")
+        print(f"Feedbacks: {feedback_list}")
+
+        # Return the response with the counts and feedbacks
+        return jsonify({
+            "message": "User dashboard data retrieved successfully",
+            "pending_requests": pending_requests,
+            "accepted_requests": accepted_requests,
+            "completed_requests": completed_requests,
+            "feedbacks": feedback_list  # Return all feedbacks given by the user
+        }), 200
+
+    return jsonify({"error": "User not found"}), 404
+

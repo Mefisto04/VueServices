@@ -106,6 +106,9 @@ with app.app_context():
         )
         db.session.add(feedback)
         db.session.commit()  # Commit the feedback to the database
+        
+        service_request1.is_completed = True  # Mark service request as completed
+        db.session.commit()  
 
         # Update freelancer's average rating
         freelancer1.update_rating()  # This method should compute the average rating from feedback

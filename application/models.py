@@ -63,6 +63,8 @@ class ServiceRequest(db.Model):
     status = db.Column(db.String(50), default="pending", nullable=False)
     request_date = db.Column(db.DateTime, default=datetime.utcnow)
     service_date = db.Column(db.DateTime, nullable=False)
+    is_completed = db.Column(db.Boolean, default=False)
+
 
     def __repr__(self):
         return f"<ServiceRequest {self.id} from User {self.user_id} to Freelancer {self.freelancer_id}>"
