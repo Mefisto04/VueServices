@@ -1,21 +1,23 @@
 export default {
   data() {
     return {
-      topFreelancers: [],
+      topProfessionals: [],
       popularServices: [],
-      userCounts: { user_count: 0, freelancer_count: 0 },
+      userCounts: { user_count: 0, professional_count: 0 },
     };
   },
   methods: {
     async fetchAnalyticsData() {
       try {
-        const freelancerResponse = await fetch("/api/top-rated-freelancers");
-        this.topFreelancers = await freelancerResponse.json();
+        const professionalResponse = await fetch(
+          "/api/top-rated-professionals"
+        );
+        this.topProfessionals = await professionalResponse.json();
 
         const servicesResponse = await fetch("/api/most-booked-services");
         this.popularServices = await servicesResponse.json();
 
-        const countsResponse = await fetch("/api/user-freelancer-counts");
+        const countsResponse = await fetch("/api/user-professional-counts");
         this.userCounts = await countsResponse.json();
       } catch (error) {
         console.error("Error fetching analytics data:", error);
@@ -37,11 +39,11 @@ export default {
       <h3>Admin Analytics Dashboard</h3>
 
       <div class="mt-4">
-        <h4>Top 5 Rated Freelancers</h4>
-        <div class="freelancer-cards">
-          <div v-for="freelancer in topFreelancers" :key="freelancer.name" class="card mb-3 p-3 shadow-sm">
-            <h5>{{ freelancer.name }}</h5>
-            <p>Rating: {{ freelancer.rating.toFixed(1) }}</p>
+        <h4>Top 5 Rated Professionals</h4>
+        <div class="professional-cards">
+          <div v-for="professional in topProfessionals" :key="professional.name" class="card mb-3 p-3 shadow-sm">
+            <h5>{{ professional.name }}</h5>
+            <p>Rating: {{ professional.rating.toFixed(1) }}</p>
           </div>
         </div>
       </div>
@@ -57,10 +59,10 @@ export default {
       </div>
 
       <div class="mt-4">
-        <h4>User and Freelancer Counts</h4>
+        <h4>User and Professional Counts</h4>
         <div class="card p-3 shadow-sm">
           <p><strong>Total Users:</strong> {{ userCounts.user_count }}</p>
-          <p><strong>Total Freelancers:</strong> {{ userCounts.freelancer_count }}</p>
+          <p><strong>Total Professionals:</strong> {{ userCounts.professional_count }}</p>
         </div>
       </div>
 

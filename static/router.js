@@ -1,8 +1,8 @@
 import Home from "./components/Home.js";
 import Login from "./components/Login.js";
 import Register from "./components/Register.js";
-import FreelancerRegister from "./components/FreelancerRegister.js";
-import FreelancerLogin from "./components/FreelancerLogin.js";
+import ProfessionalRegister from "./components/ProfessionalRegister.js";
+import ProfessionalLogin from "./components/ProfessionalLogin.js";
 import AdminLogin from "./components/AdminLogin.js";
 import Admin from "./components/Admin.js";
 import Dashboard from "./components/Dashboard.js";
@@ -13,14 +13,14 @@ const routes = [
   { path: "/user-login", component: Login, name: "Login" },
   { path: "/user-register", component: Register, name: "Register" },
   {
-    path: "/freelancer-register",
-    component: FreelancerRegister,
-    name: "FreelancerRegister",
+    path: "/professional-register",
+    component: ProfessionalRegister,
+    name: "ProfessionalRegister",
   },
   {
-    path: "/freelancer-login",
-    component: FreelancerLogin,
-    name: "FreelancerLogin",
+    path: "/professional-login",
+    component: ProfessionalLogin,
+    name: "ProfessionalLogin",
   },
   {
     path: "/admin-login",
@@ -55,12 +55,13 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   let isLoggedIn = localStorage.getItem("auth-token");
+  let role = localStorage.getItem("role");
   const loginPages = [
     "LibrarianLogin",
     "Register",
     "Login",
-    "FreelancerRegister",
-    "FreelancerLogin",
+    "ProfessionalRegister",
+    "ProfessionalLogin",
     "AdminLogin",
     "Admin",
     "Dashboard",

@@ -1,8 +1,8 @@
 export default {
   data: () => ({
     userList: [],
-    freelancerList: [],
-    freelancerRequests: [],
+    professionalList: [],
+    professionalRequests: [],
   }),
   methods: {
     getAdminData() {
@@ -19,18 +19,21 @@ export default {
         })
         .then((data) => {
           this.userList = data.users; // Store the fetched users
-          this.freelancerList = data.freelancers; // Store the fetched freelancers
-          this.freelancerRequests = data.freelancerRequests;
+          this.professionalList = data.professionals; // Store the fetched professionals
+          this.professionalRequests = data.professionalRequests;
           console.log("Fetched users:", this.userList);
-          console.log("Fetched freelancers:", this.freelancerList);
-          console.log("Fetched freelancer requests:", this.freelancerRequests);
+          console.log("Fetched professionals:", this.professionalList);
+          console.log(
+            "Fetched professional requests:",
+            this.professionalRequests
+          );
         })
         .catch((error) => {
           console.error("Error fetching admin data:", error);
         });
     },
-    approveFreelancer(freelancerId) {
-      fetch(`/api/freelancer/${freelancerId}/approve`, {
+    approveProfessional(professionalId) {
+      fetch(`/api/professional/${professionalId}/approve`, {
         method: "POST",
         headers: {
           "Authentication-Token": localStorage.getItem("auth-token"),
@@ -39,7 +42,7 @@ export default {
         .then((res) => {
           if (!res.ok) {
             throw new Error(
-              `Error approving freelancer: ${res.status} ${res.statusText}`
+              `Error approving professional: ${res.status} ${res.statusText}`
             );
           }
           return res.json();
@@ -49,18 +52,18 @@ export default {
           this.getAdminData(); // Refresh the data
         })
         .catch((error) => {
-          console.error("Error approving freelancer:", error);
+          console.error("Error approving professional:", error);
         });
     },
-    async updateFreelancer(freelancerId, service) {
+    async updateProfessional(professionalId, service) {
       try {
-        const res = await fetch("/update_freelancer_by_admin", {
+        const res = await fetch("/update_professional_by_admin", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            freelancerId: freelancerId, // Pass freelancerId
+            professionalId: professionalId, // Pass professionalId
             service: service, // Pass service
           }),
         });
@@ -103,8 +106,8 @@ export default {
           console.error("Error deleting user:", error);
         });
     },
-    deleteFreelancer(freelancerId) {
-      fetch(`/api/freelancer/${freelancerId}`, {
+    deleteProfessional(professionalId) {
+      fetch(`/api/professional/${professionalId}`, {
         method: "DELETE",
         headers: {
           "Authentication-Token": localStorage.getItem("auth-token"),
@@ -113,7 +116,7 @@ export default {
         .then((res) => {
           if (!res.ok) {
             throw new Error(
-              `Error deleting freelancer: ${res.status} ${res.statusText}`
+              `Error deleting professional: ${res.status} ${res.statusText}`
             );
           }
           return res.json();
@@ -123,12 +126,12 @@ export default {
           this.getAdminData(); // Refresh the data
         })
         .catch((error) => {
-          console.error("Error deleting freelancer:", error);
+          console.error("Error deleting professional:", error);
         });
     },
   },
   created() {
-    this.getAdminData(); // Fetch admin data (users and freelancers) when the component is created
+    this.getAdminData(); // Fetch admin data (users and professionals) when the component is created
   },
   template: `
         <div class="px-3 mt-3 pb-5">
@@ -162,43 +165,43 @@ export default {
             </tbody>
           </table>
     
-          <h3>Freelancers</h3>
+          <h3>Professionals</h3>
           <div class="row justify-content-left">
-            <div class="col-lg-2 mt-3" v-for="(freelancer, j) in freelancerList" :key="j">
+            <div class="col-lg-2 mt-3" v-for="(professional, j) in professionalList" :key="j">
               <div class="card" style="border: 1px solid #ccc; border-radius: 5px; margin: 10px;">
                 <div class="card-body" style="text-align: center;">
-                  <h5 class="card-title">{{ freelancer.name }}</h5>
-                  <p class="card-text">Email: {{ freelancer.email }}</p>
-                  <p class="card-text">Service: {{ freelancer.service }}</p>
-                  <p class="card-text">Rating: {{ freelancer.rating }}</p>
-                  <p class="card-text">Experience: {{ freelancer.experience }}</p>
-                  <a v-if="freelancer.portfolio_url && freelancer.portfolio_url !== 'null'" 
-                     :href="freelancer.portfolio_url" class="btn btn-primary" target="_blank">View Portfolio</a>
-                  <form @submit.prevent="updateFreelancer( freelancer.email , freelancer.service)">
+                  <h5 class="card-title">{{ professional.name }}</h5>
+                  <p class="card-text">Email: {{ professional.email }}</p>
+                  <p class="card-text">Service: {{ professional.service }}</p>
+                  <p class="card-text">Rating: {{ professional.rating }}</p>
+                  <p class="card-text">Experience: {{ professional.experience }}</p>
+                  <a v-if="professional.portfolio_url && professional.portfolio_url !== 'null'" 
+                     :href="professional.portfolio_url" class="btn btn-primary" target="_blank">View Portfolio</a>
+                  <form @submit.prevent="updateProfessional( professional.email , professional.service)">
                     <div class="form-group">
                       <label for="service">Service</label>
-                      <input v-model="freelancer.service" type="text" class="form-control" id="service" placeholder="Enter Service" required>
+                      <input v-model="professional.service" type="text" class="form-control" id="service" placeholder="Enter Service" required>
                     </div>
                     <button type="submit" class="btn btn-dark mt-3">Update</button>
                   </form>
-                  <button @click="deleteFreelancer(freelancer.id)" class="btn btn-danger btn-sm mt-2">Delete</button>
+                  <button @click="deleteProfessional(professional.id)" class="btn btn-danger btn-sm mt-2">Delete</button>
                 </div>
               </div>
             </div>
           </div>
 
-          <h3>Freelancer Requests</h3>
+          <h3>Professional Requests</h3>
           <div class="row justify-content-left">
-            <div class="col-lg-2 mt-3" v-for="(freelancer, index) in freelancerRequests" :key="freelancer.id">
+            <div class="col-lg-2 mt-3" v-for="(professional, index) in professionalRequests" :key="professional.id">
               <div class="card" style="border: 1px solid #ccc; border-radius: 5px; margin: 10px;">
                 <div class="card-body" style="text-align: center;">
-                  <h5 class="card-title">{{ freelancer.name }}</h5>
-                  <p class="card-text">Email: {{ freelancer.email }}</p>
-                  <p class="card-text">Service: {{ freelancer.service }}</p>
-                  <p class="card-text">Experience: {{ freelancer.experience }}</p>
-                  <a v-if="freelancer.portfolio_url" :href="freelancer.portfolio_url" target="_blank" class="btn btn-primary">View Portfolio</a>
-                  <button @click="approveFreelancer(freelancer.id)" class="btn btn-success btn-sm mt-2">Approve</button>
-                  <button @click="deleteFreelancer(freelancer.id)" class="btn btn-danger btn-sm mt-2">Delete</button>
+                  <h5 class="card-title">{{ professional.name }}</h5>
+                  <p class="card-text">Email: {{ professional.email }}</p>
+                  <p class="card-text">Service: {{ professional.service }}</p>
+                  <p class="card-text">Experience: {{ professional.experience }}</p>
+                  <a v-if="professional.portfolio_url" :href="professional.portfolio_url" target="_blank" class="btn btn-primary">View Portfolio</a>
+                  <button @click="approveProfessional(professional.id)" class="btn btn-success btn-sm mt-2">Approve</button>
+                  <button @click="deleteProfessional(professional.id)" class="btn btn-danger btn-sm mt-2">Delete</button>
                 </div>
               </div>
             </div>

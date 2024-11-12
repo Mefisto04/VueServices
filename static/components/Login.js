@@ -85,6 +85,7 @@ export default {
           localStorage.setItem("auth-token", data.token);
           localStorage.setItem("userId", data.userId);
           localStorage.setItem("name", data.name);
+          localStorage.setItem("Role", data.role);
           this.$router.push({ path: "/" });
           console.log("User ID saved to local storage:", data.userId);
         } else {

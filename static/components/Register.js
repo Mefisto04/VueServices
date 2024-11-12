@@ -22,6 +22,7 @@ export default {
         if (res.ok) {
           localStorage.setItem("userId", data.userId); // Use "userId" consistently
           localStorage.setItem("auth-token", data.token);
+          localStorage.setItem("Role", data.role);
           this.$router.push({ path: "/" });
         } else {
           this.error = data.message || "An error occurred";

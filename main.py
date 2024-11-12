@@ -3,7 +3,7 @@ from flask import Flask, jsonify
 from flask_security import Security
 
 from application.instances import cache
-from application.models import db,Freelancer,User
+from application.models import db,Professional,User
 from application.sec import datastore
 from config import DevelopmentConfig
 from application.resources import api
@@ -26,10 +26,10 @@ app = create_app()
 celery_app = celery_init_app(app)
 
 
-@app.route('/api/freelancer', methods=['GET'])
-def get_freelancers():
-    freelancers = Freelancer.query.all()  # Fetch all freelancers from the database
-    freelancer_list = [
+@app.route('/api/professional', methods=['GET'])
+def get_professionals():
+    professionals = Professional.query.all()  # Fetch all professionals from the database
+    professional_list = [
         {
             "id": f.id,
             "name": f.name,
@@ -40,19 +40,19 @@ def get_freelancers():
             "rating": f.rating,
             "service": f.service,
             "is_approved": f.is_approved
-        } for f in freelancers
+        } for f in professionals
     ]
-    return jsonify(freelancer_list)  # Return the list of freelancers as JSON
+    return jsonify(professional_list)  # Return the list of professionals as JSON
 
-@app.route('/api/freelancer/<int:freelancer_id>', methods=['DELETE'])
-def delete_freelancer(freelancer_id):
-    freelancer = Freelancer.query.get(freelancer_id)
-    if not freelancer:
-        return jsonify({"message": "Freelancer not found"}), 404
+@app.route('/api/professional/<int:professional_id>', methods=['DELETE'])
+def delete_professional(professional_id):
+    professional = Professional.query.get(professional_id)
+    if not professional:
+        return jsonify({"message": "Professional not found"}), 404
 
-    db.session.delete(freelancer)
+    db.session.delete(professional)
     db.session.commit()
-    return jsonify({"message": "Freelancer deleted successfully"}), 200
+    return jsonify({"message": "Professional deleted successfully"}), 200
 
 @app.route('/api/user/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
@@ -68,26 +68,26 @@ def delete_user(user_id):
 @app.route('/admin/data', methods=['GET'])
 def get_admin_data():
     users = User.query.all()
-    freelancers = Freelancer.query.all()
+    professionals = Professional.query.all()
     
-    # Fetch only the unapproved freelancers as requests
-    unapproved_freelancers = Freelancer.query.filter_by(is_approved=False).all()
+    # Fetch only the unapproved professionals as requests
+    unapproved_professionals = Professional.query.filter_by(is_approved=False).all()
     
     users_data = [
         {'id': user.id, 'name': user.name, 'email': user.email, 'active': user.active}
         for user in users
     ]
     
-    freelancers_data = [
-        {'id': freelancer.id, 'name': freelancer.name, 'email': freelancer.email,
-            'rating': freelancer.rating, 
-         'service': freelancer.service, 'experience': freelancer.experience,
-         'location': freelancer.location,
-          'active': freelancer.active}
-        for freelancer in freelancers
+    professionals_data = [
+        {'id': professional.id, 'name': professional.name, 'email': professional.email,
+            'rating': professional.rating, 
+         'service': professional.service, 'experience': professional.experience,
+         'location': professional.location,
+          'active': professional.active}
+        for professional in professionals
     ]
     
-    freelancer_requests = [
+    professional_requests = [
         {
             'id': f.id,
             'name': f.name,
@@ -95,32 +95,32 @@ def get_admin_data():
             'service': f.service,
             'experience': f.experience,
             'portfolio_url': f.portfolio_url,
-        } for f in unapproved_freelancers
+        } for f in unapproved_professionals
     ]
 
     return jsonify({
         'users': users_data,
-        'freelancers': freelancers_data,
-        'freelancerRequests': freelancer_requests
+        'professionals': professionals_data,
+        'professionalRequests': professional_requests
     })
 
-@app.route('/api/freelancer/<int:freelancer_id>/approve', methods=['POST'])
-def approve_freelancer(freelancer_id):
-    # Fetch the freelancer by ID
-    freelancer = Freelancer.query.get(freelancer_id)
+@app.route('/api/professional/<int:professional_id>/approve', methods=['POST'])
+def approve_professional(professional_id):
+    # Fetch the professional by ID
+    professional = Professional.query.get(professional_id)
     
-    # Check if the freelancer exists
-    if not freelancer:
-        return jsonify({"message": "Freelancer not found"}), 404
+    # Check if the professional exists
+    if not professional:
+        return jsonify({"message": "Professional not found"}), 404
     
     # Update the is_approved field
-    freelancer.is_approved = True
+    professional.is_approved = True
     
     # Commit the changes to the database
     db.session.commit()
     
     # Return a success message
-    return jsonify({"message": "Freelancer approved successfully"}), 200
+    return jsonify({"message": "Professional approved successfully"}), 200
 
 
 if __name__ == '__main__':

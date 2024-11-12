@@ -1,14 +1,14 @@
 export default {
   data: () => ({
     showModal: false,
-    freelancerList: [],
-    filteredFreelancerList: [],
+    professionalList: [],
+    filteredProfessionalList: [],
     serviceDate: null,
     upcomingServices: [],
     pastServices: [],
     serviceRequests: [],
     showFeedback: false,
-    feedbackFreelancerId: null,
+    feedbackProfessionalId: null,
     feedbackRating: null,
     feedbackComments: "",
     services: [
@@ -47,8 +47,8 @@ export default {
     editRequestId: null,
   }),
   methods: {
-    getAllFreelancers() {
-      fetch("/api/freelancer", {
+    getAllProfessionals() {
+      fetch("/api/professional", {
         method: "GET",
       })
         .then((res) => {
@@ -58,45 +58,48 @@ export default {
           return res.json();
         })
         .then((data) => {
-          console.log("Freelancer data:", data);
-          this.freelancerList = data;
-          this.filteredFreelancerList = data; // Initialize filtered list
-          console.log(this.freelancerList);
+          console.log("Professional data:", data);
+          this.professionalList = data;
+          this.filteredProfessionalList = data; // Initialize filtered list
+          console.log(this.professionalList);
         })
         .catch((error) => {
-          console.error("Error fetching freelancers:", error);
+          console.error("Error fetching professionals:", error);
         });
     },
-    filterFreelancers() {
-      this.filteredFreelancerList = this.freelancerList.filter((freelancer) => {
-        // Match by service, location, and rating
-        const matchesService =
-          !this.selectedService || freelancer.service === this.selectedService;
-        const matchesLocation =
-          !this.selectedLocation ||
-          freelancer.location === this.selectedLocation;
-        const matchesRating =
-          !this.selectedRating || freelancer.rating >= this.selectedRating;
+    filterProfessionals() {
+      this.filteredProfessionalList = this.professionalList.filter(
+        (professional) => {
+          // Match by service, location, and rating
+          const matchesService =
+            !this.selectedService ||
+            professional.service === this.selectedService;
+          const matchesLocation =
+            !this.selectedLocation ||
+            professional.location === this.selectedLocation;
+          const matchesRating =
+            !this.selectedRating || professional.rating >= this.selectedRating;
 
-        // Add search filtering for name, location, and service
-        const matchesSearch =
-          !this.searchQuery ||
-          freelancer.name
-            .toLowerCase()
-            .includes(this.searchQuery.toLowerCase()) ||
-          freelancer.location
-            .toLowerCase()
-            .includes(this.searchQuery.toLowerCase()) ||
-          freelancer.service
-            .toLowerCase()
-            .includes(this.searchQuery.toLowerCase());
+          // Add search filtering for name, location, and service
+          const matchesSearch =
+            !this.searchQuery ||
+            professional.name
+              .toLowerCase()
+              .includes(this.searchQuery.toLowerCase()) ||
+            professional.location
+              .toLowerCase()
+              .includes(this.searchQuery.toLowerCase()) ||
+            professional.service
+              .toLowerCase()
+              .includes(this.searchQuery.toLowerCase());
 
-        return (
-          matchesService && matchesLocation && matchesRating && matchesSearch
-        );
-      });
+          return (
+            matchesService && matchesLocation && matchesRating && matchesSearch
+          );
+        }
+      );
     },
-    requestService(freelancerId) {
+    requestService(professionalId) {
       const userId = localStorage.getItem("userId");
       console.log("User ID:", userId);
       console.log("Selected service date:", this.serviceDate);
@@ -108,7 +111,7 @@ export default {
 
       const requestPayload = {
         userId: userId,
-        freelancer_id: freelancerId,
+        professional_id: professionalId,
         service_date: this.serviceDate,
       };
 
@@ -131,7 +134,7 @@ export default {
         })
         .then((data) => {
           console.log("Service request successful:", data);
-          alert("Service request sent to freelancer!");
+          alert("Service request sent to professional!");
         })
         .catch((error) => {
           console.error("Error sending service request:", error);
@@ -167,7 +170,7 @@ export default {
     },
     showFeedbackForm(request) {
       this.showFeedback = true;
-      this.feedbackFreelancerId = request.freelancer_id;
+      this.feedbackProfessionalId = request.professional_id;
     },
     cancelFeedback() {
       this.showFeedback = false;
@@ -178,7 +181,7 @@ export default {
       const userId = localStorage.getItem("userId");
       const feedbackPayload = {
         userId: userId,
-        freelancerId: this.feedbackFreelancerId,
+        professionalId: this.feedbackProfessionalId,
         rating: this.feedbackRating,
         comments: this.feedbackComments,
       };
@@ -202,7 +205,7 @@ export default {
           console.log("Feedback submitted successfully:", data);
           alert("Feedback submitted successfully!");
           this.cancelFeedback();
-          this.getAllFreelancers();
+          this.getAllProfessionals();
         })
         .catch((error) => {
           console.error("Error submitting feedback:", error);
@@ -283,7 +286,7 @@ export default {
       };
 
       fetch(`/api/request-service-by-user/${requestId}`, {
-        // Ensure requestId is passed, not freelancerId
+        // Ensure requestId is passed, not professionalId
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -340,32 +343,35 @@ export default {
         });
     },
 
-    // Existing method to filter freelancers based on search, service, location, and rating
-    filterFreelancers() {
-      this.filteredFreelancerList = this.freelancerList.filter((freelancer) => {
-        const matchesService =
-          !this.selectedService || freelancer.service === this.selectedService;
-        const matchesLocation =
-          !this.selectedLocation ||
-          freelancer.location === this.selectedLocation;
-        const matchesRating =
-          !this.selectedRating || freelancer.rating >= this.selectedRating;
-        const matchesSearch =
-          !this.searchQuery ||
-          freelancer.name
-            .toLowerCase()
-            .includes(this.searchQuery.toLowerCase()) ||
-          freelancer.location
-            .toLowerCase()
-            .includes(this.searchQuery.toLowerCase()) ||
-          freelancer.service
-            .toLowerCase()
-            .includes(this.searchQuery.toLowerCase());
+    // Existing method to filter professionals based on search, service, location, and rating
+    filterProfessionals() {
+      this.filteredProfessionalList = this.professionalList.filter(
+        (professional) => {
+          const matchesService =
+            !this.selectedService ||
+            professional.service === this.selectedService;
+          const matchesLocation =
+            !this.selectedLocation ||
+            professional.location === this.selectedLocation;
+          const matchesRating =
+            !this.selectedRating || professional.rating >= this.selectedRating;
+          const matchesSearch =
+            !this.searchQuery ||
+            professional.name
+              .toLowerCase()
+              .includes(this.searchQuery.toLowerCase()) ||
+            professional.location
+              .toLowerCase()
+              .includes(this.searchQuery.toLowerCase()) ||
+            professional.service
+              .toLowerCase()
+              .includes(this.searchQuery.toLowerCase());
 
-        return (
-          matchesService && matchesLocation && matchesRating && matchesSearch
-        );
-      });
+          return (
+            matchesService && matchesLocation && matchesRating && matchesSearch
+          );
+        }
+      );
     },
 
     // Button action to log user details
@@ -374,7 +380,7 @@ export default {
     },
   },
   created() {
-    this.getAllFreelancers();
+    this.getAllProfessionals();
     this.getAllServiceRequests();
   },
   template: `
@@ -395,7 +401,7 @@ export default {
         <div class="col-lg-4" v-for="request in serviceRequests" :key="request.id" v-if="request.status === 'pending'">
           <div class="card">
             <div class="card-body">
-              <h5>Freelancer ID: {{ request.freelancer_id }}</h5>
+              <h5>Professional ID: {{ request.professional_id }}</h5>
               <p>Service Date: {{ new Date(request.service_date).toLocaleDateString() }}</p>
               <p>Status: {{ request.status }}</p>
               <div class="form-group mt-2">
@@ -423,7 +429,7 @@ export default {
         <div class="col-lg-4" v-for="request in serviceRequests" :key="request.id" v-if="request.status === 'accepted'">
           <div class="card">
             <div class="card-body">
-              <h5>Freelancer ID: {{ request.freelancer_id }}</h5>
+              <h5>Professional ID: {{ request.professional_id }}</h5>
               <p>Service Date: {{ new Date(request.service_date).toLocaleDateString() }}</p>
               <p>Status: {{ request.status }}</p>
               <button
@@ -443,7 +449,7 @@ export default {
         <div class="col-lg-4" v-for="(request, k) in serviceRequests" :key="request.id" v-if="request.status == 'completed'">
           <div class="card shadow-sm mb-3" style="border-radius: 10px;">
             <div class="card-body text-center">
-              <h5 class="card-title">Service Request to Freelancer ID: {{ request.freelancer_id }}</h5>
+              <h5 class="card-title">Service Request to Professional ID: {{ request.professional_id }}</h5>
               <p class="card-text">Service Date: {{ new Date(request.service_date).toLocaleString() }}</p>
               <p class="card-text">Status: {{ request.status }}</p>
               <button class="btn btn-primary" @click="showFeedbackForm(request)">Give Feedback</button>
@@ -459,7 +465,7 @@ export default {
 
       <!-- Feedback Form -->
       <div v-if="showFeedback" class="feedback-form">
-        <h4>Feedback for Freelancer ID: {{ feedbackFreelancerId }}</h4>
+        <h4>Feedback for Professional ID: {{ feedbackProfessionalId }}</h4>
         <div>
           <label>Rating (0-10):</label>
           <input type="number" v-model="feedbackRating" min="0" max="10" />
@@ -472,54 +478,54 @@ export default {
         <button class="btn btn-secondary" @click="cancelFeedback">Cancel</button>
       </div>
       <hr/>
-      <h3 class="mb-4">Filter Freelancers</h3>
+      <h3 class="mb-4">Filter Professionals</h3>
       <div class="row mb-4">
         <!-- Search Bar -->
         <div class="col-md-12">
           <label for="search">Search:</label>
-          <input type="text" v-model="searchQuery" @input="filterFreelancers" class="form-control" placeholder="Search by name, location, or service"/>
+          <input type="text" v-model="searchQuery" @input="filterProfessionals" class="form-control" placeholder="Search by name, location, or service"/>
         </div>
         <div class="col-md-4">
           <label for="service">Service Type:</label>
-          <select v-model="selectedService" @change="filterFreelancers" class="form-control">
+          <select v-model="selectedService" @change="filterProfessionals" class="form-control">
             <option value="">All Services</option>
             <option v-for="service in services" :key="service" :value="service">{{ service }}</option>
           </select>
         </div>
         <div class="col-md-4">
           <label for="location">Location:</label>
-          <select v-model="selectedLocation" @change="filterFreelancers" class="form-control">
+          <select v-model="selectedLocation" @change="filterProfessionals" class="form-control">
             <option value="">All Locations</option>
             <option v-for="location in locations" :key="location" :value="location">{{ location }}</option>
           </select>
         </div>
         <div class="col-md-4">
           <label for="rating">Rating (≥):</label>
-          <select v-model="selectedRating" @change="filterFreelancers" class="form-control">
+          <select v-model="selectedRating" @change="filterProfessionals" class="form-control">
             <option value="">Any Rating</option>
             <option v-for="rating in [1,2,3,4,5,6,7,8,9,10]" :key="rating" :value="rating">{{ rating }}</option>
           </select>
         </div>
       </div>
 
-      <h3 class="mb-4">Freelancers</h3>
+      <h3 class="mb-4">Professionals</h3>
       <div class="row">
-        <div class="col-lg-3" v-for="(freelancer, j) in filteredFreelancerList" :key="freelancer.id" v-if="freelancer.is_approved">
+        <div class="col-lg-3" v-for="(professional, j) in filteredProfessionalList" :key="professional.id" v-if="professional.is_approved">
           <div class="card shadow-sm mb-3" style="border-radius: 10px;">
             <div class="card-body text-center">
-              <h5 class="card-title">{{ freelancer.name }}</h5>
-              <p class="card-text">Rating: {{ freelancer.rating || 'Not rated yet' }}</p>
-              <p class="card-text">Location: {{ freelancer.location }}</p>
-              <p class="card-text">Service: {{ freelancer.service }}</p>
-              <p class="card-text">Email: {{ freelancer.email }}</p>
-              <p class="card-text">Experience: {{ freelancer.experience }}</p>
-              <a v-if="freelancer.portfolio_url && freelancer.portfolio_url !== 'null'" 
-                 :href="freelancer.portfolio_url" class="btn btn-primary mb-2" target="_blank">View Portfolio</a>
+              <h5 class="card-title">{{ professional.name }}</h5>
+              <p class="card-text">Rating: {{ professional.rating || 'Not rated yet' }}</p>
+              <p class="card-text">Location: {{ professional.location }}</p>
+              <p class="card-text">Service: {{ professional.service }}</p>
+              <p class="card-text">Email: {{ professional.email }}</p>
+              <p class="card-text">Experience: {{ professional.experience }}</p>
+              <a v-if="professional.portfolio_url && professional.portfolio_url !== 'null'" 
+                 :href="professional.portfolio_url" class="btn btn-primary mb-2" target="_blank">View Portfolio</a>
               <div class="form-group mt-2">
                 <label for="serviceDate">Select Date and Time:</label>
                 <input type="datetime-local" v-model="serviceDate" class="form-control mt-3" />
               </div>
-              <button class="btn btn-success mt-3" @click="requestService(freelancer.id)">Request Service</button>
+              <button class="btn btn-success mt-3" @click="requestService(professional.id)">Request Service</button>
             </div>
           </div>
         </div>

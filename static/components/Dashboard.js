@@ -1,6 +1,6 @@
 export default {
   data: () => ({
-    freelancer: {
+    professional: {
       name: localStorage.getItem("name") || "",
       email: localStorage.getItem("email") || "",
       experience: localStorage.getItem("experience") || "",
@@ -11,66 +11,32 @@ export default {
     success: "",
   }),
   methods: {
-    async sendReminder() {
-      const freelancerId = localStorage.getItem("freelancerId");
-      if (!freelancerId) {
-        this.error = "Freelancer ID is missing. Please log in again.";
+    async updateProfessional() {
+      const professionalId = localStorage.getItem("professionalId");
+      console.log("Professional Uniquifier:", professionalId);
+
+      if (!professionalId || professionalId === "undefined") {
+        this.error = "Professional ID is missing. Please log in again.";
         return;
       }
 
       try {
-        const response = await fetch(
-          `http://127.0.0.1:5000/api/send_reminder/${freelancerId}`, // freelancerId should be the email here
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        const data = await response.json();
-
-        if (response.ok) {
-          this.success = "Reminder email sent successfully!";
-          console.log("Pending:", data.pending_requests);
-          console.log("Approved:", data.approved_requests);
-          console.log("Completed:", data.completed_requests);
-        } else {
-          this.error = data.error || "Failed to send reminder email.";
-        }
-      } catch (error) {
-        this.error = "An error occurred while sending the reminder email.";
-        console.error(error);
-      }
-    },
-
-    async updateFreelancer() {
-      const freelancerId = localStorage.getItem("freelancerId");
-      console.log("Freelancer Uniquifier:", freelancerId);
-
-      if (!freelancerId || freelancerId === "undefined") {
-        this.error = "Freelancer ID is missing. Please log in again.";
-        return;
-      }
-
-      try {
-        const res = await fetch("/update_freelancer", {
+        const res = await fetch("/update_professional", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ ...this.freelancer, freelancerId }),
+          body: JSON.stringify({ ...this.professional, professionalId }),
         });
 
         const data = await res.json();
 
         if (res.ok) {
           this.success = "Profile updated successfully!";
-          localStorage.setItem("name", this.freelancer.name);
-          localStorage.setItem("email", this.freelancer.email);
-          localStorage.setItem("experience", this.freelancer.experience);
-          localStorage.setItem("portfolioUrl", this.freelancer.portfolio_url);
+          localStorage.setItem("name", this.professional.name);
+          localStorage.setItem("email", this.professional.email);
+          localStorage.setItem("experience", this.professional.experience);
+          localStorage.setItem("portfolioUrl", this.professional.portfolio_url);
         } else {
           this.error = data.message;
         }
@@ -80,17 +46,17 @@ export default {
       }
     },
     async fetchServiceRequests() {
-      const freelancerUniquifier = localStorage.getItem("freelancerId");
-      console.log("Freelancer Uniquifier:", freelancerUniquifier);
+      const professionalUniquifier = localStorage.getItem("professionalId");
+      console.log("Professional Uniquifier:", professionalUniquifier);
 
-      if (!freelancerUniquifier) {
-        this.error = "Freelancer identifier is missing. Please log in again.";
+      if (!professionalUniquifier) {
+        this.error = "Professional identifier is missing. Please log in again.";
         return;
       }
 
       try {
         const res = await fetch(
-          `/api/service-requests/freelancer/${freelancerUniquifier}`
+          `/api/service-requests/professional/${professionalUniquifier}`
         );
         if (!res.ok) {
           throw new Error("Failed to fetch service requests");
@@ -124,13 +90,46 @@ export default {
         this.error = "An error occurred while updating the request status.";
       }
     },
+    async sendReminder() {
+      const professionalId = localStorage.getItem("professionalId");
+      if (!professionalId) {
+        this.error = "Professional ID is missing. Please log in again.";
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `http://127.0.0.1:5000/api/send_reminder/${professionalId}`, // professionalId should be the email here
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (response.ok) {
+          this.success = "Reminder email sent successfully!";
+          console.log("Pending:", data.pending_requests);
+          console.log("Approved:", data.approved_requests);
+          console.log("Completed:", data.completed_requests);
+        } else {
+          this.error = data.error || "Failed to send reminder email.";
+        }
+      } catch (error) {
+        this.error = "An error occurred while sending the reminder email.";
+        console.error(error);
+      }
+    },
   },
   mounted() {
     this.fetchServiceRequests(); // Fetch requests on component mount
   },
   template: `
     <div class="container my-4">
-      <h2 class="text-center mb-4">Freelancer Dashboard</h2>
+      <h2 class="text-center mb-4">Professional Dashboard</h2>
       <div v-if="error" class="alert alert-danger">{{ error }}</div>
       <div v-if="success" class="alert alert-success">{{ success }}</div>
 
@@ -140,22 +139,22 @@ export default {
 
       <div class="border rounded shadow p-4 mb-4 animate__animated animate__fadeIn">
         <h3>Update Profile</h3>
-        <form @submit.prevent="updateFreelancer">
+        <form @submit.prevent="updateProfessional">
           <div class="form-group">
             <label for="name">Name</label>
-            <input v-model="freelancer.name" type="text" class="form-control" id="name" placeholder="Enter name" required>
+            <input v-model="professional.name" type="text" class="form-control" id="name" placeholder="Enter name" required>
           </div>
           <div class="form-group">
             <label for="email">Email</label>
-            <input v-model="freelancer.email" type="email" class="form-control" id="email" placeholder="Enter email" required>
+            <input v-model="professional.email" type="email" class="form-control" id="email" placeholder="Enter email" required>
           </div>
           <div class="form-group">
             <label for="experience">Experience</label>
-            <input v-model="freelancer.experience" type="text" class="form-control" id="experience" placeholder="Enter experience" required>
+            <input v-model="professional.experience" type="text" class="form-control" id="experience" placeholder="Enter experience" required>
           </div>
           <div class="form-group">
             <label for="portfolio">Portfolio URL</label>
-            <input v-model="freelancer.portfolio_url" type="url" class="form-control" id="portfolio" placeholder="Enter portfolio URL" required>
+            <input v-model="professional.portfolio_url" type="url" class="form-control" id="portfolio" placeholder="Enter portfolio URL" required>
           </div>
           <button type="submit" class="btn btn-dark mt-3">Update</button>
         </form>

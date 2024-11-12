@@ -10,7 +10,7 @@ class RolesUsers(db.Model):
     __tablename__ = 'roles_users'
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))  # Link to User table
-    freelancer_id = db.Column(db.Integer(), db.ForeignKey('freelancers.id'))  # Link to Freelancer table
+    professional_id = db.Column(db.Integer(), db.ForeignKey('professionals.id'))  # Link to Professional table
     role_id = db.Column(db.Integer(), db.ForeignKey('role.id'))  # Link to Role table
 
 class Role(db.Model, RoleMixin):
@@ -18,8 +18,8 @@ class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80), unique=True)
     description = db.Column(db.String(255))
-    users = db.relationship('User', secondary='roles_users', backref=db.backref('roles', lazy='dynamic'),overlaps="freelancers,roles")
-    freelancers = db.relationship('Freelancer', secondary='roles_users', backref=db.backref('roles', lazy='dynamic'),overlaps="freelancers,roles")
+    users = db.relationship('User', secondary='roles_users', backref=db.backref('roles', lazy='dynamic'),overlaps="professionals,roles")
+    professionals = db.relationship('Professional', secondary='roles_users', backref=db.backref('roles', lazy='dynamic'),overlaps="professionals,roles")
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
@@ -29,9 +29,10 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(255))
     active = db.Column(db.Boolean())
     fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
+    role = db.Column(db.String(50), default='User') 
 
-class Freelancer(db.Model, UserMixin):
-    __tablename__ = 'freelancers'
+class Professional(db.Model, UserMixin):
+    __tablename__ = 'professionals'
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     name = db.Column(db.String(30))
     email = db.Column(db.String(), unique=True)
@@ -44,9 +45,10 @@ class Freelancer(db.Model, UserMixin):
     fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
     rating = db.Column(db.Float, default=0)
     is_approved = db.Column(db.Boolean, default=False)
+    role = db.Column(db.String(50), default='Professional') 
 
     def update_rating(self):
-        feedbacks = Feedback.query.filter_by(freelancer_id=self.id).all()
+        feedbacks = Feedback.query.filter_by(professional_id=self.id).all()
         if feedbacks:
             average_rating = sum(feedback.rating for feedback in feedbacks) / len(feedbacks)
             self.rating = average_rating
@@ -59,7 +61,7 @@ class ServiceRequest(db.Model):
     __tablename__ = 'service_requests'
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    freelancer_id = db.Column(db.Integer, db.ForeignKey('freelancers.id'), nullable=False)
+    professional_id = db.Column(db.Integer, db.ForeignKey('professionals.id'), nullable=False)
     status = db.Column(db.String(50), default="pending", nullable=False)
     request_date = db.Column(db.DateTime, default=datetime.utcnow)
     service_date = db.Column(db.DateTime, nullable=False)
@@ -67,7 +69,7 @@ class ServiceRequest(db.Model):
 
 
     def __repr__(self):
-        return f"<ServiceRequest {self.id} from User {self.user_id} to Freelancer {self.freelancer_id}>"
+        return f"<ServiceRequest {self.id} from User {self.user_id} to Professional {self.professional_id}>"
 
 
 
@@ -80,16 +82,17 @@ class Admin(db.Model, UserMixin):
     password = db.Column(db.String(255))
     active = db.Column(db.Boolean())
     fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
+    role = db.Column(db.String(50), default='Admin') 
     
 
 class Feedback(db.Model):
     __tablename__ = 'feedback'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    freelancer_id = db.Column(db.Integer, db.ForeignKey('freelancers.id'), nullable=False)
+    professional_id = db.Column(db.Integer, db.ForeignKey('professionals.id'), nullable=False)
     rating = db.Column(db.Integer, nullable=False)  # Rating out of 10
     comments = db.Column(db.String(255))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     user = db.relationship('User', backref='feedbacks')
-    freelancer = db.relationship('Freelancer', backref='feedbacks')
+    professional = db.relationship('Professional', backref='feedbacks')

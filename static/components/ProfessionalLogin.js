@@ -10,7 +10,7 @@ export default {
     async login() {
       try {
         console.log("Attempting login with:", this.user);
-        const res = await fetch("/freelancer-login", {
+        const res = await fetch("/professional-login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -24,10 +24,11 @@ export default {
           if (data.is_approved) {
             console.log("Login successful:", data);
             // localStorage.setItem("auth-token", data.token);
-            localStorage.setItem("freelancerId", data.freelancerId);
+            localStorage.setItem("professionalId", data.professionalId);
             localStorage.setItem("name", data.name);
             localStorage.setItem("experience", data.experience);
             localStorage.setItem("portfolioUrl", data.portfolioUrl);
+            localStorage.setItem("Role", data.role);
 
             this.$router.push({ path: "/dashboard" });
           } else {
@@ -60,7 +61,7 @@ export default {
         <div class="row justify-content-center">
           <div class="col-lg-6">
             <div style="margin-top: 140px">
-              <h3>Freelancer Login</h3>
+              <h3>Professional Login</h3>
               <div class="alert alert-danger" v-if="error!=''">
                 {{error}}
               </div>
@@ -76,7 +77,7 @@ export default {
                 <button class="btn btn-dark" @click="login">LOGIN</button>
               </div>
               <p class="mb-0 mt-2">Don't have an account yet?</p>
-              <router-link to="/freelancer-register">Register</router-link>
+              <router-link to="/professional-register">Register</router-link>
             </div>
           </div>
         </div>
