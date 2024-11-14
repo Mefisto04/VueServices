@@ -28,7 +28,7 @@ export default {
             localStorage.setItem("name", data.name);
             localStorage.setItem("experience", data.experience);
             localStorage.setItem("portfolioUrl", data.portfolioUrl);
-            localStorage.setItem("Role", data.role);
+            localStorage.setItem("role", data.role);
 
             this.$router.push({ path: "/dashboard" });
           } else {

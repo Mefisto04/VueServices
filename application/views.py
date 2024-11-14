@@ -549,31 +549,25 @@ def export_completed_services():
 
 @app.route("/api/send_reminder/<string:professional_id>", methods=["POST"])
 def send_reminder(professional_id):
-    # Query the Professional by the passed professional_id (now treated as a string)
-    professional = Professional.query.filter_by(email=professional_id).first()  # Use email for matching
-
+    professional = Professional.query.filter_by(email=professional_id).first()  
     if professional:
-        # Query ServiceRequest table for this professional's pending, approved, and completed requests
         pending_requests = ServiceRequest.query.filter_by(professional_id=professional.id, status="pending").count()
         approved_requests = ServiceRequest.query.filter_by(professional_id=professional.id, status="accepted").count()
         completed_requests = ServiceRequest.query.filter_by(professional_id=professional.id, status="completed").count()
 
-        # Print the counts to the console for testing
         print(f"Professional: {professional.name}")
         print(f"Pending requests: {pending_requests}")
         print(f"Approved requests: {approved_requests}")
         print(f"Completed requests: {completed_requests}")
 
-        # email_content = render_template_string(
-        #     open('email/daily_reminder.html').read(),  # Adjust the path of your HTML file
-        #     name=professional.name,  # Pass the professional's name
-        #     pending=pending_requests,
-        #     approved=approved_requests,
-        #     completed=completed_requests
-        # )
-
-        # # Send the email
-        # send_message(professional.email, "Your Daily Reminder", email_content)
+        email_content = render_template_string(
+            open('email/daily_reminder.html').read(),  
+            name=professional.name, 
+            pending=pending_requests,
+            approved=approved_requests,
+            completed=completed_requests
+        )
+        send_message(professional.email, "Your Daily Reminder", email_content)
 
 
         # Return the response with the counts

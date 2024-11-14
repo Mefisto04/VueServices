@@ -38,7 +38,7 @@ export default {
             localStorage.setItem("name", this.professional.name);
             localStorage.setItem("email", this.professional.email);
             localStorage.setItem("experience", this.professional.experience);
-            localStorage.setItem("Role", data.role);
+            localStorage.setItem("role", data.role);
             localStorage.setItem(
               "portfolioUrl",
               this.professional.portfolio_url

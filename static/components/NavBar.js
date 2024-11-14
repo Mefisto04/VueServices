@@ -1,6 +1,7 @@
 export default {
   data: () => ({
     searchValue: "",
+    // role: localStorage.getItem("role") || null,
   }),
   methods: {
     search() {
@@ -21,7 +22,14 @@ export default {
       }
       localStorage.removeItem("auth-token");
       localStorage.removeItem("role");
-      this.$router.push({ name: "ProfessionalRegister" });
+      localStorage.clear();
+      this.$router.push({ name: "Landing" });
+    },
+  },
+  watch: {
+    // Watch for route changes to refresh the role dynamically
+    $route() {
+      this.role = localStorage.getItem("role");
     },
   },
   created() {
@@ -39,7 +47,7 @@ export default {
 <div class="navbar">
   <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">
+      <a class="navbar-brand" href="/">
         <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top"> 
         <h2 class="d-inline">Professional Hub</h2>
       </a>
@@ -48,9 +56,9 @@ export default {
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
-          <template v-if="!isLoggedIn">
+          <template v-if="!role">
             <li class="nav-item">
-              <router-link to="/login" tag="a" class="nav-link">Member Login</router-link>
+              <router-link to="/user-login" tag="a" class="nav-link">Member Login</router-link>
             </li>
             <li class="nav-item">
               <router-link to="/professional-login" tag="a" class="nav-link">Professional Login</router-link>

@@ -24,7 +24,7 @@ export default {
           console.log("Login successful, navigating to /admin");
           console.log("Current route before navigation:", this.$route.path);
           // localStorage.setItem("auth-token", data.token);
-          localStorage.setItem("Admin", data.role);
+          localStorage.setItem("role", data.role);
           this.$router.push({ path: "/admin" });
         } else {
           this.error = data.message; // Display error message from server

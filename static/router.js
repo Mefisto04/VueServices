@@ -9,7 +9,7 @@ import Dashboard from "./components/Dashboard.js";
 import Landing from "./components/Landing.js";
 import AdminAnalytics from "./components/AdminAnalytics.js";
 const routes = [
-  { path: "/", component: Home, name: "Home" },
+  { path: "/home", component: Home, name: "Home" },
   { path: "/user-login", component: Login, name: "Login" },
   { path: "/user-register", component: Register, name: "Register" },
   {
@@ -38,7 +38,7 @@ const routes = [
     name: "Dashboard",
   },
   {
-    path: "/landing",
+    path: "/",
     component: Landing,
     name: "Landing",
   },
@@ -78,7 +78,7 @@ router.beforeEach((to, from, next) => {
     if (isLoggedIn) {
       next();
     } else {
-      next({ name: "Login" });
+      next({ name: "Landing" });
     }
   }
   // if (to.name !== "Login" && !localStorage.getItem("auth-token") ? true : false)

@@ -58,7 +58,7 @@ export default {
 
     <!-- Users Section -->
     <section id="users" class="section">
-      <div class="container text-center">
+      <div class=" text-center">
         <h2 class="heading-2">For Users</h2>
         <p class="text-lg">Experience hassle-free household services at your fingertips. From cleaning to repairs, find trusted professionals for all your needs.</p>
         <ul class="feature-list">
@@ -69,25 +69,6 @@ export default {
         <button class="button button-primary">Book a Service</button>
       </div>
     </section>
-
-    <!-- Subscription Section -->
-    <div class="subscription text-center">
-      <h2 class="heading-2">Join Our Platform Today</h2>
-      <p class="text-lg">Whether you're looking for services or want to provide them, Collective is the platform for you.</p>
-      <input type="email" placeholder="Your Email" class="input-email" v-model="user.email" />
-      <button class="button button-primary" @click="subscribe">Subscribe to Newsletter</button>
-      <div v-if="isSubscribed" class="text-success">Thank you for subscribing!</div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-      <p>© 2024 Collective. All rights reserved.</p>
-      <ul class="footer-links">
-        <li><a href="#">Privacy Policy</a></li>
-        <li><a href="#">Terms of Service</a></li>
-        <li><a href="#">Contact Us</a></li>
-      </ul>
-    </footer>
   </main>
 `,
 };

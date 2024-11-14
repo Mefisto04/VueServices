@@ -23,12 +23,12 @@ from smtplib import SMTP
 def send_message(to_email, subject, body):
     SMTP_HOST = 'smtp.gmail.com'
     SMTP_PORT = 587
-    USERNAME = 'your_email@gmail.com'
-    PASSWORD = 'your_password'  # Or an app-specific password
+    USERNAME = 'mayurkawale4321@gmail.com'
+    PASSWORD = 'sjfz uzht dtsl lxkb' 
 
     with SMTP(SMTP_HOST, SMTP_PORT) as client:
-        client.starttls()  # Upgrade the connection to a secure one
-        client.login(USERNAME, PASSWORD)  # Login with credentials
+        client.starttls() 
+        client.login(USERNAME, PASSWORD)  
         msg = f"Subject: {subject}\n\n{body}"
-        client.sendmail(USERNAME, to_email, msg)  # Send the email
+        client.sendmail(USERNAME, to_email, msg)
         print("Email sent!")
