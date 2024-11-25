@@ -13,6 +13,7 @@ from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 from .mail_service import send_message
 from flask import render_template_string
+from datetime import timedelta
 
 CORS(app)
 # from .sec import datastore
@@ -303,12 +304,27 @@ def request_service():
 
     if not all([user_id, professional_id, service_date]):
         return jsonify({'error': 'All fields are required'}), 400
-
     try:
         # Convert date string to datetime
         service_date_parsed = datetime.strptime(service_date, '%Y-%m-%dT%H:%M')
     except ValueError:
         return jsonify({'error': 'Invalid service date format. Expected format is YYYY-MM-DDTHH:MM'}), 400
+    
+    time_buffer = timedelta(minutes=30)
+
+    # Check for conflicting requests
+    conflicting_request = ServiceRequest.query.filter(
+        ServiceRequest.professional_id == professional_id,
+        ServiceRequest.status == "accepted",
+        ServiceRequest.service_date.between(
+            service_date_parsed - time_buffer, 
+            service_date_parsed + time_buffer
+        )
+    ).first()
+
+    if conflicting_request:
+        return jsonify({"error": "Professional is busy during this time. Please choose another time."}), 409
+
 
     # Fetch full user details
     user = User.query.filter_by(fs_uniquifier=user_id).first()  # Adjusted to match your identifier
@@ -607,6 +623,16 @@ def get_user_dashboard(user_id):
             }
             for feedback in feedbacks
         ]
+
+        email_content = render_template_string(
+            open('email/monthly_remainder_user.html').read(),  
+            name=user.name, 
+            pending=pending_requests,
+            approved=accepted_requests,
+            completed=completed_requests,
+            feedbacks=feedback_list
+        )
+        send_message(user.email, "Your Daily Reminder", email_content)
         
         # Print the counts and feedback for testing (optional)
         print(f"User: {user.name}")
@@ -661,3 +687,54 @@ def add_service():
     db.session.commit()
 
     return jsonify({"success": True, "message": "Service added successfully"})
+
+
+
+
+@app.route('/api/professional/analytics/<string:professional_email>', methods=['GET'])
+def get_professional_analytics(professional_email):
+    try:
+        # Fetch the professional by email
+        professional = Professional.query.filter_by(email=professional_email).first()
+
+        if not professional:
+            return jsonify({"error": "Professional not found"}), 404
+
+        # Fetch service request counts
+        pending_requests = ServiceRequest.query.filter_by(professional_id=professional.id, status="pending").count()
+        accepted_requests = ServiceRequest.query.filter_by(professional_id=professional.id, status="accepted").count()
+        completed_requests = ServiceRequest.query.filter_by(professional_id=professional.id, is_completed=True).count()
+
+        # Fetch feedback and calculate average rating
+        feedbacks = Feedback.query.filter_by(professional_id=professional.id).all()
+        feedback_list = [
+            {
+                "user_id": feedback.user_id,
+                "rating": feedback.rating,
+                "comments": feedback.comments,
+                "created_at": feedback.created_at
+            }
+            for feedback in feedbacks
+        ]
+        analytics = {
+            "professional_name": professional.name,
+            # "rating": round(average_rating, 2),
+            "total_requests": pending_requests + accepted_requests + completed_requests,
+            "pending_requests": pending_requests,
+            "accepted_requests": accepted_requests,
+            "completed_requests": completed_requests,
+            "feedbacks": feedback_list,
+        }
+
+        print(f"Analytics for {professional.name}:")
+        print(f"Pending requests: {pending_requests}")
+        print(f"Accepted requests: {accepted_requests}")
+        print(f"Completed requests: {completed_requests}")
+        # print(f"Average rating: {average_rating}")
+
+        return jsonify(analytics), 200
+
+    except Exception as e:
+        # Handle unexpected errors
+        print(f"Error fetching analytics: {e}")
+        return jsonify({"error": str(e)}), 500

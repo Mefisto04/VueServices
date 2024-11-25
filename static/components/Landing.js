@@ -48,8 +48,11 @@ export default {
       <h1>Your One-Stop Solution for Household Services</h1>
       <p>Connect with trusted service providers for all your household needs. Fast, reliable, and rated by your community.</p>
       <div class="button-group">
-        <button  class="button button-primary">Get Started</button>
+        <a href="http://127.0.0.1:5000/#/user-login">
+          <button class="button button-primary">Get Started</button>
+        </a>
       </div>
+
     </div>
   </div>
 
@@ -76,7 +79,11 @@ export default {
           <li>Vetted and rated professionals</li>
           <li>Flexible scheduling</li>
         </ul>
-        <button class="button button-primary">Book a Service</button>
+        <div class="button-group">
+        <a href="http://127.0.0.1:5000/#/user-login">
+          <button class="button button-primary">Book a Service</button>
+        </a>
+      </div>
       </div>
     </section>
   </main>

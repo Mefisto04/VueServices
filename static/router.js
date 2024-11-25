@@ -105,6 +105,7 @@ import ProfessionalRequests from "./components/ProfessionalRequests.js";
 import AddServices from "./components/AddServices.js";
 import FindProfessionals from "./components/FindProfessionals.js";
 import PastServices from "./components/PastServices.js";
+import ProfessionalAnalytics from "./components/ProfessionalAnalytics.js";
 
 const routes = [
   {
@@ -240,6 +241,15 @@ const routes = [
     meta: {
       requiresAuth: true,
       allowedRoles: ["User"],
+    },
+  },
+  {
+    path: "/professional-analytics",
+    component: ProfessionalAnalytics,
+    name: "ProfessionalAnalytics",
+    meta: {
+      requiresAuth: true,
+      allowedRoles: ["Professional"],
     },
   },
 ];

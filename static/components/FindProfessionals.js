@@ -3,7 +3,7 @@ export default {
     showModal: false,
     professionalList: [],
     filteredProfessionalList: [],
-    serviceDate: null,
+    serviceDates: {},
     upcomingServices: [],
     pastServices: [],
     serviceRequests: [],
@@ -29,6 +29,7 @@ export default {
     showEditModal: false,
     editServiceDate: null,
     editRequestId: null,
+    serviceError: null,
   }),
   methods: {
     getAllProfessionals() {
@@ -124,7 +125,11 @@ export default {
         body: JSON.stringify(requestPayload),
       })
         .then((res) => {
-          if (!res.ok) {
+          if (res.status === 409) {
+            return res.text().then((text) => {
+              throw new Error(`Professional is busy: ${text}`);
+            });
+          } else if (!res.ok) {
             return res.text().then((text) => {
               throw new Error(`Service request failed: ${text}`);
             });
@@ -132,8 +137,8 @@ export default {
           return res.json();
         })
         .then((data) => {
-          console.log("Service request successful:", data);
           alert("Service request sent to professional!");
+          console.log("Service request successful:", data);
         })
         .catch((error) => {
           console.error("Error sending service request:", error);
@@ -264,7 +269,7 @@ export default {
           console.log("Service date submitted successfully:", data);
           alert("Service date has been submitted successfully!");
           // Optionally refresh service requests or clear selected date after submission
-          this.serviceDate = null;
+          this.$set(this.serviceDates, professionalId, null);
           this.getAllServiceRequests();
         })
         .catch((error) => {
@@ -390,9 +395,15 @@ export default {
                    :href="professional.portfolio_url" class="btn btn-primary mb-2" target="_blank">View Portfolio</a>
                 <div class="form-group mt-2">
                   <label for="serviceDate">Select Date and Time:</label>
-                  <input type="datetime-local" v-model="serviceDate" class="form-control mt-3" />
+                  <input type="datetime-local" 
+                    v-model="serviceDates[professional.id]" 
+                    class="form-control mt-3" />
+                </div>
+                <div v-if="serviceError" class="alert alert-danger mt-3">
+                  {{ serviceError }}
                 </div>
                 <button class="btn btn-success mt-3" @click="requestService(professional.id)">Request Service</button>
+                
               </div>
             </div>
           </div>
