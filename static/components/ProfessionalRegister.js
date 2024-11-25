@@ -4,6 +4,7 @@ export default {
       email: "",
       name: "",
       password: "",
+      confirmPassword: "",
       service: "",
       experience: "", // Added experience field
       portfolio_url: "", // Added portfolio URL field
@@ -22,6 +23,11 @@ export default {
   }),
   methods: {
     async register() {
+      if (this.professional.password !== this.professional.confirmPassword) {
+        this.error = "Passwords do not match!";
+        return;
+      }
+
       fetch("/professional-register", {
         method: "POST",
         headers: {
@@ -43,7 +49,15 @@ export default {
               "portfolioUrl",
               this.professional.portfolio_url
             );
-            this.$router.push({ path: "/dashboard" });
+            // this.$router.push({ path: "/dashboard" });
+            console.log(
+              "Waiting for account is yet to be approved by admin. Please wait:",
+              data.message
+            );
+            alert(
+              "Waiting for account is yet to be approved by admin. Please wait:" +
+                data.message
+            );
           } else {
             this.error = data.message;
           }
@@ -75,6 +89,10 @@ export default {
                                 <div class="form-group">
                                     <label>Password</label>
                                     <input type="password" v-model="professional.password" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Confirm Password</label>
+                                    <input type="password" v-model="professional.confirmPassword" class="form-control" />
                                 </div>
                                 <div class="form-group">
                                     <label>Experience</label>

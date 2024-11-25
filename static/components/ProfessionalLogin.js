@@ -23,7 +23,7 @@ export default {
         if (res.ok) {
           if (data.is_approved) {
             console.log("Login successful:", data);
-            // localStorage.setItem("auth-token", data.token);
+            localStorage.setItem("auth-token", data.token);
             localStorage.setItem("professionalId", data.professionalId);
             localStorage.setItem("name", data.name);
             localStorage.setItem("experience", data.experience);

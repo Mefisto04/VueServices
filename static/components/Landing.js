@@ -31,17 +31,27 @@ export default {
       }
     },
   },
+  setup() {
+    const bgImage = new URL("./Bg.jpg", import.meta.url).href;
+    return {
+      bgImage,
+    };
+  },
   template: `
   <main class="main-container">
     <!-- Header Section -->
-    <div class="text-center header-section">
-      <h1 class="heading-1">Your One-Stop Solution for Household Services</h1>
-      <p class="text-lg">Connect with trusted service providers for all your household needs. Fast, reliable, and rated by your community.</p>
+     <div class="header-section">
+    <div class="image-container">
+      <img :src="bgImage" alt="Household" />
+    </div>
+    <div class="text-container">
+      <h1>Your One-Stop Solution for Household Services</h1>
+      <p>Connect with trusted service providers for all your household needs. Fast, reliable, and rated by your community.</p>
       <div class="button-group">
-        <button class="button button-primary">Get Started</button>
-        <button class="button button-outline">Learn More</button>
+        <button  class="button button-primary">Get Started</button>
       </div>
     </div>
+  </div>
 
     <!-- Features Section -->
     <h2 class="heading-2 text-center">Our Features</h2>

@@ -171,54 +171,7 @@ export default {
       this.showFeedback = true;
       this.feedbackProfessionalId = request.professional_id;
     },
-    cancelFeedback() {
-      this.showFeedback = false;
-      this.feedbackRating = null;
-      this.feedbackComments = "";
-    },
-    submitFeedback() {
-      const userId = localStorage.getItem("userId");
-      const feedbackPayload = {
-        userId: userId,
-        professionalId: this.feedbackProfessionalId,
-        rating: this.feedbackRating,
-        comments: this.feedbackComments,
-      };
-
-      fetch("/api/feedback", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(feedbackPayload),
-      })
-        .then((res) => {
-          if (!res.ok) {
-            return res.text().then((text) => {
-              throw new Error(`Feedback submission failed: ${text}`);
-            });
-          }
-          return res.json();
-        })
-        .then((data) => {
-          console.log("Feedback submitted successfully:", data);
-          alert("Feedback submitted successfully!");
-          this.cancelFeedback();
-          this.getAllProfessionals();
-        })
-        .catch((error) => {
-          console.error("Error submitting feedback:", error);
-          alert("Error submitting feedback: " + error.message);
-        });
-    },
     async updateRequestStatus(requestId, status) {
-      const confirmAction = confirm(
-        "Are you sure you want to mark this service as completed?"
-      );
-      if (!confirmAction) {
-        return; // Exit if the user cancels the confirmation
-      }
-
       try {
         const res = await fetch(`/api/request-service/${requestId}`, {
           method: "PUT",
@@ -391,67 +344,59 @@ export default {
     this.fetchLocations();
   },
   template: `
-    <div class="px-3 mt-3 pb-5">
-      <button class="btn btn-primary mt-3" @click="getUserDashboard">Get User Dashboard</button>
-      <br/>
-      <br/>
-      <div class="modal" v-if="showEditModal">
-        <div class="modal-content">
-          <h4>Edit Service Date</h4>
-          <label>New Service Date:</label>
-          <input type="date" v-model="editServiceDate" />
-          <button class="btn btn-primary" @click="updateServiceRequestDate">Save</button>
-          <button class="btn btn-secondary" @click="showEditModal = false">Cancel</button>
+      <div class="px-3 mt-3 pb-5">
+        <h3 class="mb-4">Filter Professionals</h3>
+        <div class="row mb-4">
+          <!-- Search Bar -->
+          <div class="col-md-12">
+            <label for="search">Search:</label>
+            <input type="text" v-model="searchQuery" @input="filterProfessionals" class="form-control" placeholder="Search by name, location, or service"/>
+          </div>
+          <div class="col-md-4">
+            <label for="service">Service Type:</label>
+            <select v-model="selectedService" @change="filterProfessionals" class="form-control">
+              <option value="">All Services</option>
+              <option v-for="service in services" :key="service" :value="service">{{ service }}</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="location">Location:</label>
+            <select v-model="selectedLocation" @change="filterProfessionals" class="form-control">
+              <option value="">All Locations</option>
+              <option v-for="location in locations" :key="location" :value="location">{{ location }}</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="rating">Rating (≥):</label>
+            <select v-model="selectedRating" @change="filterProfessionals" class="form-control">
+              <option value="">Any Rating</option>
+              <option v-for="rating in [1,2,3,4,5,6,7,8,9,10]" :key="rating" :value="rating">{{ rating }}</option>
+            </select>
+          </div>
         </div>
-      </div>
-
-      <h3>Upcoming Services</h3>
-      <div class="row">
-        <div class="col-lg-4" v-for="request in serviceRequests" :key="request.id" v-if="request.status === 'pending'">
-          <div class="card">
-            <div class="card-body">
-              <h5>Professional ID: {{ request.professional_id }}</h5>
-              <p>Service Date: {{ new Date(request.service_date).toLocaleDateString() }}</p>
-              <p>Status: {{ request.status }}</p>
-              <div class="form-group mt-2">
-                <label for="serviceDate">Select Date and Time:</label>
-                <input
-                  type="datetime-local"
-                  v-model="serviceDate"
-                  class="form-control mt-3"
-                />
+  
+        <h3 class="mb-4">Professionals</h3>
+        <div class="row">
+          <div class="col-lg-3" v-for="(professional, j) in filteredProfessionalList" :key="professional.id" v-if="professional.is_approved">
+            <div class="card shadow-sm mb-3" style="border-radius: 10px;">
+              <div class="card-body text-center">
+                <h5 class="card-title">{{ professional.name }}</h5>
+                <p class="card-text">Rating: {{ professional.rating || 'Not rated yet' }}</p>
+                <p class="card-text">Location: {{ professional.location }}</p>
+                <p class="card-text">Service: {{ professional.service }}</p>
+                <p class="card-text">Email: {{ professional.email }}</p>
+                <p class="card-text">Experience: {{ professional.experience }}</p>
+                <a v-if="professional.portfolio_url && professional.portfolio_url !== 'null'" 
+                   :href="professional.portfolio_url" class="btn btn-primary mb-2" target="_blank">View Portfolio</a>
+                <div class="form-group mt-2">
+                  <label for="serviceDate">Select Date and Time:</label>
+                  <input type="datetime-local" v-model="serviceDate" class="form-control mt-3" />
+                </div>
+                <button class="btn btn-success mt-3" @click="requestService(professional.id)">Request Service</button>
               </div>
-              <button
-                class="btn btn-warning btn-sm mt-2"
-                @click="submitServiceDate(request.id, serviceDate)"
-              >
-                Submit Service Date
-              </button>
-
             </div>
           </div>
         </div>
       </div>
-
-      <h3>Accepted Services</h3>
-      <div class="row">
-        <div class="col-lg-4" v-for="request in serviceRequests" :key="request.id" v-if="request.status === 'accepted'">
-          <div class="card">
-            <div class="card-body">
-              <h5>Professional ID: {{ request.professional_id }}</h5>
-              <p>Service Date: {{ new Date(request.service_date).toLocaleDateString() }}</p>
-              <p>Status: {{ request.status }}</p>
-              <button
-                class="btn btn-success mt-2"
-                @click="updateRequestStatus(request.id, 'completed')"
-              >
-                Mark as Completed
-              </button>
-
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
+    `,
 };

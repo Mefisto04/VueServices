@@ -99,7 +99,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://127.0.0.1:5000/api/send_reminder/${professionalId}`, // professionalId should be the email here
+          `http://127.0.0.1:5000/api/send_reminder/${professionalId}`,
           {
             method: "POST",
             headers: {
@@ -125,7 +125,7 @@ export default {
     },
   },
   mounted() {
-    this.fetchServiceRequests(); // Fetch requests on component mount
+    this.fetchServiceRequests();
   },
   template: `
     <div class="container my-4">
@@ -136,30 +136,6 @@ export default {
       <button @click="sendReminder" class="btn btn-primary mb-4">
         Send Daily Reminder
       </button>
-
-      <div class="border rounded shadow p-4 mb-4 animate__animated animate__fadeIn">
-        <h3>Update Profile</h3>
-        <form @submit.prevent="updateProfessional">
-          <div class="form-group">
-            <label for="name">Name</label>
-            <input v-model="professional.name" type="text" class="form-control" id="name" placeholder="Enter name" required>
-          </div>
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input v-model="professional.email" type="email" class="form-control" id="email" placeholder="Enter email" required>
-          </div>
-          <div class="form-group">
-            <label for="experience">Experience</label>
-            <input v-model="professional.experience" type="text" class="form-control" id="experience" placeholder="Enter experience" required>
-          </div>
-          <div class="form-group">
-            <label for="portfolio">Portfolio URL</label>
-            <input v-model="professional.portfolio_url" type="url" class="form-control" id="portfolio" placeholder="Enter portfolio URL" required>
-          </div>
-          <button type="submit" class="btn btn-dark mt-3">Update</button>
-        </form>
-      </div>
-
       <h3 class="mt-4">Service Requests</h3>
       <div v-if="requests.length === 0" class="alert alert-info">No service requests available.</div>
       <div class="alert alert-info">Request number: {{ requests.length }}</div>
@@ -170,8 +146,8 @@ export default {
             <p class="card-text">Email: {{ request.user.user_email }}</p>
             <p class="card-text">Status: <span :class="{ accepted: request.status === 'accepted', rejected: request.status === 'rejected' }">{{ request.status }}</span></p>
             <p class="card-text">Service Date: {{ new Date(request.service_date).toLocaleString() }}</p>
-            <button v-if="request.status !== 'accepted'" class="btn btn-success btn-sm" @click="updateRequestStatus(request.request_id, 'accepted')">Accept</button>
-            <button v-if="request.status !== 'rejected'" class="btn btn-danger btn-sm" @click="updateRequestStatus(request.request_id, 'rejected')">Reject</button>
+            <button v-if="request.status !== 'accepted' && request.status !== 'completed'" class="btn btn-success btn-sm" @click="updateRequestStatus(request.request_id, 'accepted')">Accept</button>
+            <button v-if="request.status !== 'rejected' && request.status !== 'completed'" class="btn btn-danger btn-sm" @click="updateRequestStatus(request.request_id, 'rejected')">Reject</button>
           </div>
         </div>
       </div>

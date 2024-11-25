@@ -96,3 +96,14 @@ class Feedback(db.Model):
 
     user = db.relationship('User', backref='feedbacks')
     professional = db.relationship('Professional', backref='feedbacks')
+
+
+class Service(db.Model):
+    __tablename__ = 'services'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(255), nullable=False)
+    num_professionals = db.Column(db.Integer, default=0)
+
+    def __init__(self, name, num_professionals=0):
+        self.name = name
+        self.num_professionals = num_professionals

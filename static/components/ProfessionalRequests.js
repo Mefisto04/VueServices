@@ -3,11 +3,6 @@ export default {
     userList: [],
     professionalList: [],
     professionalRequests: [],
-    services: [],
-    newService: {
-      name: "",
-      numProfessionals: 0,
-    },
   }),
   methods: {
     getAdminData() {
@@ -139,58 +134,24 @@ export default {
     this.getAdminData(); // Fetch admin data (users and professionals) when the component is created
   },
   template: `
-        <div class="px-3 mt-3 pb-5">
-          <h3>Admin Dashboard</h3>
-          <h3>Users</h3>
-          <table class="table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Active</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(user, index) in userList" :key="user.id">
-                <td>{{ user.id }}</td>
-                <td>{{ user.name }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.active ? 'Yes' : 'No' }}</td>
-                <td>
-                  <button @click="deleteUser(user.id)" class="btn btn-danger btn-sm">Delete</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-    
-          <h3>Professionals</h3>
-          <div class="row justify-content-left">
-            <div class="col-lg-2 mt-3" v-for="(professional, j) in professionalList" :key="j">
-              <div class="card" style="border: 1px solid #ccc; border-radius: 5px; margin: 10px;">
-                <div class="card-body" style="text-align: center;">
-                  <h5 class="card-title">{{ professional.name }}</h5>
-                  <p class="card-text">Email: {{ professional.email }}</p>
-                  <p class="card-text">Service: {{ professional.service }}</p>
-                  <p class="card-text">Rating: {{ professional.rating }}</p>
-                  <p class="card-text">Experience: {{ professional.experience }}</p>
-                  <a v-if="professional.portfolio_url && professional.portfolio_url !== 'null'" 
-                     :href="professional.portfolio_url" class="btn btn-primary" target="_blank">View Portfolio</a>
-                  <form @submit.prevent="updateProfessional( professional.email , professional.service)">
-                    <div class="form-group">
-                      <label for="service">Service</label>
-                      <input v-model="professional.service" type="text" class="form-control" id="service" placeholder="Enter Service" required>
-                    </div>
-                    <button type="submit" class="btn btn-dark mt-3">Update</button>
-                  </form>
-                  <button @click="deleteProfessional(professional.id)" class="btn btn-danger btn-sm mt-2">Delete</button>
+          <div class="px-3 mt-3 pb-5">
+  
+            <h3>Professional Requests</h3>
+            <div class="row justify-content-left">
+              <div class="col-lg-2 mt-3" v-for="(professional, index) in professionalRequests" :key="professional.id">
+                <div class="card" style="border: 1px solid #ccc; border-radius: 5px; margin: 10px;">
+                  <div class="card-body" style="text-align: center;">
+                    <h5 class="card-title">{{ professional.name }}</h5>
+                    <p class="card-text">Email: {{ professional.email }}</p>
+                    <p class="card-text">Service: {{ professional.service }}</p>
+                    <p class="card-text">Experience: {{ professional.experience }}</p>
+                    <a v-if="professional.portfolio_url" :href="professional.portfolio_url" target="_blank" class="btn btn-primary">View Portfolio</a>
+                    <button @click="approveProfessional(professional.id)" class="btn btn-success btn-sm mt-2">Approve</button>
+                    <button @click="deleteProfessional(professional.id)" class="btn btn-danger btn-sm mt-2">Delete</button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-
-          
-        </div>
-      `,
+        `,
 };

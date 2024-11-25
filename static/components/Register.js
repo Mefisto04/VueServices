@@ -4,11 +4,16 @@ export default {
       email: "",
       name: "",
       password: "",
+      confirmPassword: "",
     },
     error: "",
   }),
   methods: {
     async register() {
+      if (this.professional.password !== this.professional.confirmPassword) {
+        this.error = "Passwords do not match!";
+        return;
+      }
       try {
         const res = await fetch("/user-register", {
           method: "POST",
@@ -52,6 +57,10 @@ export default {
           <label for="password">Password</label>
           <input type="password" v-model="user.password" class="form-control mt-2" id="password" placeholder="Enter your password" />
         </div>
+        <div class="form-group">
+           <label>Confirm Password</label>
+            <input type="password" v-model="professional.confirmPassword" class="form-control" />
+        </div>                           
         <div class="form-group mt-4">
           <button class="btn btn-dark w-100" @click="register" style="transition: background-color 0.3s;">
             REGISTER

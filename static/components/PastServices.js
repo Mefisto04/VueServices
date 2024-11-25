@@ -212,13 +212,6 @@ export default {
         });
     },
     async updateRequestStatus(requestId, status) {
-      const confirmAction = confirm(
-        "Are you sure you want to mark this service as completed?"
-      );
-      if (!confirmAction) {
-        return; // Exit if the user cancels the confirmation
-      }
-
       try {
         const res = await fetch(`/api/request-service/${requestId}`, {
           method: "PUT",
@@ -391,67 +384,42 @@ export default {
     this.fetchLocations();
   },
   template: `
-    <div class="px-3 mt-3 pb-5">
-      <button class="btn btn-primary mt-3" @click="getUserDashboard">Get User Dashboard</button>
-      <br/>
-      <br/>
-      <div class="modal" v-if="showEditModal">
-        <div class="modal-content">
-          <h4>Edit Service Date</h4>
-          <label>New Service Date:</label>
-          <input type="date" v-model="editServiceDate" />
-          <button class="btn btn-primary" @click="updateServiceRequestDate">Save</button>
-          <button class="btn btn-secondary" @click="showEditModal = false">Cancel</button>
-        </div>
-      </div>
+      <div class="px-3 mt-3 pb-5">
 
-      <h3>Upcoming Services</h3>
-      <div class="row">
-        <div class="col-lg-4" v-for="request in serviceRequests" :key="request.id" v-if="request.status === 'pending'">
-          <div class="card">
-            <div class="card-body">
-              <h5>Professional ID: {{ request.professional_id }}</h5>
-              <p>Service Date: {{ new Date(request.service_date).toLocaleDateString() }}</p>
-              <p>Status: {{ request.status }}</p>
-              <div class="form-group mt-2">
-                <label for="serviceDate">Select Date and Time:</label>
-                <input
-                  type="datetime-local"
-                  v-model="serviceDate"
-                  class="form-control mt-3"
-                />
+  
+        <h3 class="mb-4">Past Services</h3>
+        <div class="row">
+          <div class="col-lg-4" v-for="(request, k) in serviceRequests" :key="request.id" v-if="request.status == 'completed'">
+            <div class="card shadow-sm mb-3" style="border-radius: 10px;">
+              <div class="card-body text-center">
+                <h5 class="card-title">Service Request to Professional ID: {{ request.professional_id }}</h5>
+                <p class="card-text">Service Date: {{ new Date(request.service_date).toLocaleString() }}</p>
+                <p class="card-text">Status: {{ request.status }}</p>
+                <button  class="btn btn-primary" @click="showFeedbackForm(request)">Give Feedback</button>
               </div>
-              <button
-                class="btn btn-warning btn-sm mt-2"
-                @click="submitServiceDate(request.id, serviceDate)"
-              >
-                Submit Service Date
-              </button>
-
             </div>
           </div>
         </div>
-      </div>
-
-      <h3>Accepted Services</h3>
-      <div class="row">
-        <div class="col-lg-4" v-for="request in serviceRequests" :key="request.id" v-if="request.status === 'accepted'">
-          <div class="card">
-            <div class="card-body">
-              <h5>Professional ID: {{ request.professional_id }}</h5>
-              <p>Service Date: {{ new Date(request.service_date).toLocaleDateString() }}</p>
-              <p>Status: {{ request.status }}</p>
-              <button
-                class="btn btn-success mt-2"
-                @click="updateRequestStatus(request.id, 'completed')"
-              >
-                Mark as Completed
-              </button>
-
-            </div>
+  
+        <hr/>
+  
+        
+  
+  
+        <!-- Feedback Form -->
+        <div v-if="showFeedback" class="feedback-form">
+          <h4>Feedback for Professional ID: {{ feedbackProfessionalId }}</h4>
+          <div>
+            <label>Rating (0-10):</label>
+            <input type="number" v-model="feedbackRating" min="0" max="10" />
           </div>
+          <div>
+            <label>Comments:</label>
+            <textarea v-model="feedbackComments"></textarea>
+          </div>
+          <button class="btn btn-success" @click="submitFeedback">Submit Feedback</button>
+          <button class="btn btn-secondary" @click="cancelFeedback">Cancel</button>
         </div>
       </div>
-    </div>
-  `,
+    `,
 };

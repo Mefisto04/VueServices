@@ -1,9 +1,58 @@
-.main-container {
+/* .main-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   padding: 2rem;
+} */
+
+.main-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin: 0 auto;
+  padding: 20px;
+  max-width: 1200px;
+}
+
+/* Header section styles */
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.header-section .image-container {
+  flex: 1;
+}
+
+.header-section .image-container img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.header-section .text-container {
+  flex: 1;
+  text-align: left;
+  padding: 20px;
+}
+
+.header-section .text-container h1 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.header-section .text-container p {
+  font-size: 1.125rem;
+  margin-bottom: 20px;
+}
+
+.header-section .text-container .button-group button {
+  margin-right: 10px;
 }
 
 .header-section,

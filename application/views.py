@@ -6,7 +6,7 @@ from flask_security import auth_required, roles_required
 from sqlalchemy import or_
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_restful import marshal, fields
-from .models import User, db, Professional,Admin,ServiceRequest,Feedback
+from .models import User, db, Professional,Admin,ServiceRequest,Feedback,Service
 from .sec import datastore
 from flask_cors import CORS
 from sqlalchemy import func
@@ -43,7 +43,7 @@ def user_login():
     # Verify the password
     if check_password_hash(user.password, password):
         return jsonify({
-            "token": user.get_auth_token(),  # Replace with actual token generation
+            "token": user.get_auth_token(),
             "email": user.email,
             "userId":user.fs_uniquifier,
             "name": user.name,
@@ -105,6 +105,9 @@ def professional_register():
 
     if not email or not name or not password or not experience:
         return jsonify({"message": "All fields are required"}), 400
+    
+    if portfolio_url and not portfolio_url.startswith('https://'):
+        portfolio_url = 'https://' + portfolio_url
 
     professional_exists = Professional.query.filter_by(email=email).first()
     if professional_exists:
@@ -170,7 +173,7 @@ def professional_login():
     # Verify the password
     if check_password_hash(professional.password, password):
         return jsonify({
-            # "token": professional.get_auth_token(),
+            "token": professional.get_auth_token(),
             "email": professional.email,
             "professionalId": professional.fs_uniquifier,
             "name": professional.name,
@@ -217,7 +220,7 @@ def admin_login():
     # Check password
     if check_password_hash(admin.password, password):
         return jsonify({
-            # "token": admin.get_auth_token(),
+            "token": admin.get_auth_token(),
             "email": admin.email,
             "adminId": admin.id,
             "name": admin.name,
@@ -431,6 +434,7 @@ def get_professional_service_requests(uniquifier):
     return jsonify(response), 200
 
 
+
 @app.route('/api/service-requests/<string:user_id>', methods=['GET'])
 def get_service_requests(user_id):
     # Find the user by email (assuming email is used as user_id)
@@ -471,7 +475,7 @@ def submit_feedback():
 
     service_request = ServiceRequest.query.filter_by(user_id=user.id, professional_id=professional_id).first()
     if service_request:
-        service_request.is_completed = True  # Mark as completed once feedback is provided
+        service_request.is_completed = True  
         db.session.commit() 
 
     db.session.commit()
@@ -563,6 +567,7 @@ def send_reminder(professional_id):
         email_content = render_template_string(
             open('email/daily_reminder.html').read(),  
             name=professional.name, 
+            rating=professional.rating,
             pending=pending_requests,
             approved=approved_requests,
             completed=completed_requests
@@ -573,6 +578,7 @@ def send_reminder(professional_id):
         # Return the response with the counts
         return jsonify({
             "message": "Reminder sent successfully",
+            "Rating": professional.rating,
             "pending_requests": pending_requests,
             "approved_requests": approved_requests,
             "completed_requests": completed_requests
@@ -620,3 +626,38 @@ def get_user_dashboard(user_id):
 
     return jsonify({"error": "User not found"}), 404
 
+
+
+@app.route('/admin/services', methods=['GET'])
+def get_services():
+    services = Service.query.all()
+    services_data = [
+        {
+            "id": service.id,
+            "name": service.name,
+            "numProfessionals": service.num_professionals
+        }
+        for service in services
+    ]
+    return jsonify({"services": services_data})
+
+@app.route('/admin/services', methods=['POST'])
+def add_service():
+    data = request.json
+    if not data or 'name' not in data:
+        return jsonify({"error": "Service name is required"}), 400
+
+    service_name = data['name']
+
+    # Count the number of professionals offering this service
+    professional_count = Professional.query.filter_by(service=service_name).count()
+
+    # Add the service to the Service table
+    new_service = Service(
+        name=service_name,
+        num_professionals=professional_count
+    )
+    db.session.add(new_service)
+    db.session.commit()
+
+    return jsonify({"success": True, "message": "Service added successfully"})
