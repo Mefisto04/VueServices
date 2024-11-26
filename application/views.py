@@ -769,6 +769,39 @@ def add_service():
     return jsonify({"success": True, "message": "Service added successfully"})
 
 
+@app.route('/admin/services/<int:service_id>', methods=['PUT'])
+def update_service(service_id):
+    data = request.json
+    service = Service.query.get(service_id)
+    
+    if not service:
+        return jsonify({"error": "Service not found"}), 404
+
+    # Update the service name
+    if 'name' in data:
+        service.name = data['name']
+
+    # Update the number of professionals based on the updated service name
+    professional_count = Professional.query.filter_by(service=service.name).count()
+    service.num_professionals = professional_count
+    
+    db.session.commit()
+
+    return jsonify({"success": True, "message": "Service updated successfully"})
+
+
+@app.route('/admin/services/<int:service_id>', methods=['DELETE'])
+def delete_service(service_id):
+    service = Service.query.get(service_id)
+    
+    if not service:
+        return jsonify({"error": "Service not found"}), 404
+    
+    db.session.delete(service)
+    db.session.commit()
+    
+    return jsonify({"success": True, "message": "Service deleted successfully"})
+
 
 
 @app.route('/api/professional/analytics/<string:professional_email>', methods=['GET'])
