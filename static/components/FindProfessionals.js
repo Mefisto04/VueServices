@@ -11,16 +11,7 @@ export default {
     feedbackProfessionalId: null,
     feedbackRating: null,
     feedbackComments: "",
-    services: [
-      "Cleaning",
-      "Gardening",
-      "Plumbing",
-      "Electrical Work",
-      "Handyman",
-      "Painting",
-      "Moving",
-      "Others",
-    ],
+    services: [],
     locations: [],
     selectedService: "",
     selectedLocation: "",
@@ -53,18 +44,45 @@ export default {
         });
     },
     fetchLocations() {
-      fetch("location.json")
+      fetch("/api/locations", {
+        // Create this endpoint in your backend
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
         .then((res) => {
           if (!res.ok) {
-            throw new Error("Failed to load locations from location.json");
+            throw new Error("Failed to load locations");
           }
           return res.json();
         })
         .then((data) => {
-          this.locations = data.locations; // Assuming location.json has a "locations" key
+          this.locations = data.locations;
         })
         .catch((error) => {
           console.error("Error fetching locations:", error);
+        });
+    },
+    fetchServices() {
+      fetch("/api/services", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error("Failed to load services");
+          }
+          return res.json();
+        })
+        .then((data) => {
+          // Store just the service names in the services array
+          this.services = data.services.map((service) => service.name);
+        })
+        .catch((error) => {
+          console.error("Error fetching services:", error);
         });
     },
     filterProfessionals() {
@@ -346,6 +364,7 @@ export default {
   created() {
     this.getAllProfessionals();
     this.getAllServiceRequests();
+    this.fetchServices();
     this.fetchLocations();
   },
   template: `

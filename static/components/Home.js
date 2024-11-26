@@ -160,7 +160,10 @@ export default {
           return res.json();
         })
         .then((data) => {
-          this.serviceRequests = data;
+          this.serviceRequests = data.map((request) => ({
+            ...request,
+            serviceDate: request.service_date || null, // Add serviceDate property if not already present
+          }));
           console.log(this.serviceRequests);
         })
         .catch((error) => {
@@ -292,7 +295,6 @@ export default {
       };
 
       fetch(`/api/request-service-by-user/${requestId}`, {
-        // Ensure requestId is passed, not professionalId
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -310,8 +312,6 @@ export default {
         .then((data) => {
           console.log("Service date submitted successfully:", data);
           alert("Service date has been submitted successfully!");
-          // Optionally refresh service requests or clear selected date after submission
-          this.serviceDate = null;
           this.getAllServiceRequests();
         })
         .catch((error) => {
@@ -417,7 +417,7 @@ export default {
                 <label for="serviceDate">Select Date and Time:</label>
                 <input
                   type="datetime-local"
-                  v-model="serviceDate"
+                  v-model="request.serviceDate"
                   class="form-control mt-3"
                 />
               </div>

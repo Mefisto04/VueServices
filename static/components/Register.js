@@ -10,7 +10,7 @@ export default {
   }),
   methods: {
     async register() {
-      if (this.professional.password !== this.professional.confirmPassword) {
+      if (this.user.password !== this.user.confirmPassword) {
         this.error = "Passwords do not match!";
         return;
       }
@@ -59,8 +59,8 @@ export default {
         </div>
         <div class="form-group">
            <label>Confirm Password</label>
-            <input type="password" v-model="professional.confirmPassword" class="form-control" />
-        </div>                           
+            <input type="password" v-model="user.confirmPassword" class="form-control" />
+        </div>                     
         <div class="form-group mt-4">
           <button class="btn btn-dark w-100" @click="register" style="transition: background-color 0.3s;">
             REGISTER

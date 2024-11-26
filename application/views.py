@@ -540,9 +540,13 @@ def user_professional_counts():
     professional_count = db.session.query(func.count(Professional.id)).scalar()
     return jsonify({'user_count': user_count, 'professional_count': professional_count})
 
+
+
 import csv
 from flask import Response
 from datetime import datetime
+
+
 
 @app.route('/api/export-completed-services', methods=['GET'])
 def export_completed_services():
@@ -738,3 +742,22 @@ def get_professional_analytics(professional_email):
         # Handle unexpected errors
         print(f"Error fetching analytics: {e}")
         return jsonify({"error": str(e)}), 500
+
+
+
+@app.route('/api/locations', methods=['GET'])
+def get_locations():
+    locations = ["Mumbai", "Delhi", "Bangalore", "Hyderabad", "Ahmedabad", "Chennai", "Kolkata","Nagpur"]
+    return jsonify({"locations": locations})
+
+
+@app.route('/api/services', methods=['GET'])
+def get_services_by_user():
+    try:
+        services = Service.query.all()
+        return jsonify({
+            'services': [{'id': service.id, 'name': service.name, 'num_professionals': service.num_professionals} 
+                        for service in services]
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
