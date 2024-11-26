@@ -36,6 +36,8 @@ def get_professionals():
             "email": f.email,
             "location": f.location,
             "experience": f.experience,
+            "service": f.service,
+            "service_price": f.service_price,
             "portfolio_url": f.portfolio_url,
             "rating": f.rating,
             "service": f.service,
@@ -50,7 +52,9 @@ def delete_professional(professional_id):
     if not professional:
         return jsonify({"message": "Professional not found"}), 404
 
-    db.session.delete(professional)
+    # db.session.delete(professional)
+    #dont delete professional, just set active to -1
+    professional.is_approved = -1
     db.session.commit()
     return jsonify({"message": "Professional deleted successfully"}), 200
 
@@ -81,7 +85,9 @@ def get_admin_data():
     professionals_data = [
         {'id': professional.id, 'name': professional.name, 'email': professional.email,
             'rating': professional.rating, 
-         'service': professional.service, 'experience': professional.experience,
+         'service': professional.service,
+         'service_price': professional.service_price,
+        'experience': professional.experience,
          'location': professional.location,
           'active': professional.active}
         for professional in professionals
@@ -93,6 +99,7 @@ def get_admin_data():
             'name': f.name,
             'email': f.email,
             'service': f.service,
+            'service_price': f.service_price,
             'experience': f.experience,
             'portfolio_url': f.portfolio_url,
         } for f in unapproved_professionals

@@ -20,31 +20,42 @@ export default {
 
         const data = await res.json();
 
+        // Handle cases for is_approved
         if (res.ok) {
-          if (data.is_approved) {
+          if (data.is_approved === 1) {
+            // Login successful
             console.log("Login successful:", data);
             localStorage.setItem("auth-token", data.token);
             localStorage.setItem("professionalId", data.professionalId);
             localStorage.setItem("name", data.name);
+            localStorage.setItem("email", data.email);
+            localStorage.setItem("service", data.service);
+            localStorage.setItem("service_price", data.service_price);
             localStorage.setItem("experience", data.experience);
             localStorage.setItem("portfolioUrl", data.portfolioUrl);
             localStorage.setItem("role", data.role);
 
             this.$router.push({ path: "/dashboard" });
-          } else {
+          } else if (data.is_approved === 0) {
+            // Pending approval
             console.log(
-              "Account is yet to be approved by admin. Please wait:",
+              "Account is yet to be approved by admin, Please wait:",
               data.message
             );
             this.error =
-              "Your account is not yet approved by the admin. Please wait for approval.";
+              "Your account is pending approval by the admin. Please wait.";
+          } else if (data.is_approved === -1) {
+            // Rejected by admin
+            console.log(
+              "Account is rejected by admin, Please make a new account:",
+              data.message
+            );
+            this.error =
+              "Your account has been rejected by the admin. Please register a new account.";
+          } else {
+            console.log("Unexpected approval state:", data.is_approved);
+            this.error = "Unexpected error. Please contact support.";
           }
-        } else if (data.is_approved == false) {
-          console.log(
-            "Account is yet to be approved by admin, Please wait:",
-            data.message
-          );
-          this.error = data.message;
         } else {
           console.log("Login failed:", data.message);
           this.error = data.message;

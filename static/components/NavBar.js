@@ -93,6 +93,8 @@ export default {
               <li class="nav-item">
                 <router-link to="/requests" tag="a" class="nav-link">Requests</router-link>
               </li>
+              </li>
+              
               <li class="nav-item">
                 <router-link to="/professional-analytics" tag="a" class="nav-link">Analytics</router-link>
               </li>
@@ -109,7 +111,9 @@ export default {
               <li class="nav-item">
                 <router-link to="/add-services" tag="a" class="nav-link">Add Services</router-link>
               </li>
-              
+              <li class="nav-item">
+                <router-link to="/admin-feedbacks" tag="a" class="nav-link">Feedbacks</router-link>
+              </li>
               <li class="nav-item">
                 <router-link to="/admin-analytics" tag="a" class="nav-link">Analytics</router-link>
               </li>

@@ -393,7 +393,7 @@ export default {
               font-weight: 600;
               margin-bottom: 1rem;
               text-align: center;
-            ">Service Request to Professional ID: {{ request.professional_id }}</h5>
+            ">Service Request to Professional Name: {{ request.professional_name }}</h5>
             
             <div style="
               background-color: #f8f9fa;

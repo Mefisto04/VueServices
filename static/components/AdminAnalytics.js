@@ -43,11 +43,6 @@ export default {
       <!-- Chart for Top 5 Rated Professionals -->
       <div class="mt-4">
         <h4>Top 5 Rated Professionals</h4>
-        <img v-if="professionalChartImg" 
-             :src="'data:image/png;base64,' + professionalChartImg" 
-             alt="Top Professionals Chart"
-             class="img-fluid"
-        />
         <div class="mt-3">
           <h5>Data:</h5>
           <ul>

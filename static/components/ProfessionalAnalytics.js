@@ -4,6 +4,7 @@ export default {
       total_requests: 0,
       pending_requests: 0,
       accepted_requests: 0,
+      rejected_requests: 0,
       completed_requests: 0,
       average_rating: 0,
       feedbacks: [],
@@ -68,6 +69,12 @@ export default {
               <div class="card p-3 text-center">
                 <h5>Accepted Requests</h5>
                 <h3>{{ analytics.accepted_requests }}</h3>
+              </div>
+            </div>
+            <div class="col-md-4 mb-4">
+              <div class="card p-3 text-center">
+                <h5>Rejected Requests</h5>
+                <h3>{{ analytics.rejected_requests }}</h3>
               </div>
             </div>
             <div class="col-md-4 mb-4">

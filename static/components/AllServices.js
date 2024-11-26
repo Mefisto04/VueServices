@@ -396,7 +396,7 @@ export default {
           <div class="col-lg-4" v-for="request in serviceRequests" :key="request.id" v-if="request.status === 'pending'">
             <div class="card">
               <div class="card-body">
-                <h5>Professional ID: {{ request.professional_id }}</h5>
+                <h6>Professional Name: {{ request.professional_name }}</h6>
                 <p>Service Date: {{ new Date(request.service_date).toLocaleDateString() }}</p>
                 <p>Status: {{ request.status }}</p>
                 <div class="form-group mt-2">

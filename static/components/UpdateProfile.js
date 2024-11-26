@@ -3,6 +3,8 @@ export default {
     professional: {
       name: localStorage.getItem("name") || "",
       email: localStorage.getItem("email") || "",
+      service: localStorage.getItem("service") || "",
+      service_price: localStorage.getItem("service_price") || "",
       experience: localStorage.getItem("experience") || "",
       portfolio_url: localStorage.getItem("portfolioUrl") || "",
     },
@@ -35,6 +37,11 @@ export default {
           this.success = "Profile updated successfully!";
           localStorage.setItem("name", this.professional.name);
           localStorage.setItem("email", this.professional.email);
+          localStorage.setItem("service", this.professional.service);
+          localStorage.setItem(
+            "service_price",
+            this.professional.service_price
+          );
           localStorage.setItem("experience", this.professional.experience);
           localStorage.setItem("portfolioUrl", this.professional.portfolio_url);
         } else {
@@ -62,6 +69,14 @@ export default {
             <div class="form-group">
               <label for="email">Email</label>
               <input v-model="professional.email" type="email" class="form-control" id="email" placeholder="Enter email" required>
+            </div>
+            <div class="form-group">
+              <label for="service">Service</label>
+              <input v-model="professional.service" type="text" class="form-control" id="service" placeholder="Enter service" required>
+            </div>
+            <div class="form-group">
+              <label for="service_price">Service Price</label>
+              <input v-model="professional.service_price" type="text" class="form-control" id="service_price" placeholder="Enter service price" required>
             </div>
             <div class="form-group">
               <label for="experience">Experience</label>

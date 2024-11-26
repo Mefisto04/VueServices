@@ -15,6 +15,7 @@ import FindProfessionals from "./components/FindProfessionals.js";
 import PastServices from "./components/PastServices.js";
 import ProfessionalAnalytics from "./components/ProfessionalAnalytics.js";
 import AllServices from "./components/AllServices.js";
+import AdminFeedbacks from "./components/AdminFeedbacks.js";
 
 const routes = [
   {
@@ -168,6 +169,15 @@ const routes = [
     meta: {
       requiresAuth: true,
       allowedRoles: ["User"],
+    },
+  },
+  {
+    path: "/admin-feedbacks",
+    component: AdminFeedbacks,
+    name: "AdminFeedbacks",
+    meta: {
+      requiresAuth: true,
+      allowedRoles: ["Admin"],
     },
   },
 ];

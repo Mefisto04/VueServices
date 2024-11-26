@@ -101,14 +101,29 @@ def professional_register():
     name = data.get('name')
     password = data.get('password')
     experience = data.get('experience', '')
+    location= data.get('location', '')
     portfolio_url = data.get('portfolio_url', '')
-    service = data.get('service', '')
+    service_name = data.get('service', '')
+    service_price = data.get('service_price', 0)
+
+    try:
+        service_price = int(service_price)
+    except ValueError:
+        return jsonify({"message": "Service price must be a valid number."}), 400
 
     if not email or not name or not password or not experience:
         return jsonify({"message": "All fields are required"}), 400
     
     if portfolio_url and not portfolio_url.startswith('https://'):
         portfolio_url = 'https://' + portfolio_url
+
+    service = Service.query.filter_by(name=service_name).first()
+    if not service:
+        return jsonify({"message": f"Service '{service_name}' does not exist."}), 404
+    if service_price < service.base_price:
+        return jsonify({
+            "message": f"The minimum price for the '{service_name}' service is {service.base_price}. Please set a price greater than or equal to the minimum price."
+        }), 400
 
     professional_exists = Professional.query.filter_by(email=email).first()
     if professional_exists:
@@ -120,9 +135,11 @@ def professional_register():
         password=generate_password_hash(password),
         experience=experience,
         portfolio_url=portfolio_url,
-        service=service,
+        location=location,
+        service=service_name,
+        service_price=service_price,
         active=True,
-        is_approved=False,
+        is_approved=0,
         fs_uniquifier=email
     )
 
@@ -135,6 +152,9 @@ def professional_register():
             "professionalId": professional.fs_uniquifier,
             "name": professional.name,
             "email": professional.email, 
+            "location": professional.location,
+            "service": professional.service,
+            "service_price": professional.service_price,
             "experience": professional.experience,
             "portfolioUrl": professional.portfolio_url,
             "role": "Professional"
@@ -163,6 +183,17 @@ def professional_login():
     if not professional:
         return jsonify({"message": "Professional Not Found"}), 404
 
+    if professional.is_approved == 0:
+        return jsonify({
+            "message": "Your account is pending admin approval. Please wait.",
+            "is_approved": professional.is_approved
+        }), 403
+    elif professional.is_approved == -1:
+        return jsonify({
+            "message": "Your account was rejected by the admin. Please register a new account.",
+            "is_approved": professional.is_approved
+        }), 403
+    
     # Check if the professional's account is active
     if not professional.active:
         return jsonify({"message": "Account is not active"}), 403
@@ -178,6 +209,8 @@ def professional_login():
             "email": professional.email,
             "professionalId": professional.fs_uniquifier,
             "name": professional.name,
+            "service": professional.service,
+            "service_price": professional.service_price,
             "experience": professional.experience,
             "portfolioUrl": professional.portfolio_url,
             "role": "Professional",
@@ -240,6 +273,8 @@ def update_professional():
     name = data.get('name')
     email = data.get('email')
     experience = data.get('experience')
+    service = data.get('service')
+    service_price = data.get('service_price')
     portfolio_url = data.get('portfolio_url')
 
     professional = Professional.query.filter_by(fs_uniquifier=professional_id).first()
@@ -252,6 +287,8 @@ def update_professional():
 
     professional.name = name
     professional.email = email
+    professional.service = service
+    professional.service_price = service_price
     professional.experience = experience
     professional.portfolio_url = portfolio_url
 
@@ -260,6 +297,8 @@ def update_professional():
         return jsonify({
             "message": "Professional profile updated successfully",
             "name": professional.name,
+            "service": professional.service,
+            "service_price": professional.service_price,
             "experience": professional.experience,
             "portfolio_url": professional.portfolio_url
         }), 200
@@ -462,6 +501,7 @@ def get_service_requests(user_id):
     return jsonify([{
         'id': req.id,
         'professional_id': req.professional_id,
+        'professional_name': Professional.query.get(req.professional_id).name,
         'service_date': req.service_date.isoformat(),
         'status': req.status,
         'request_date': req.request_date.isoformat(),
@@ -542,7 +582,7 @@ def top_rated_professionals():
     # Get data from database
     top_professionals = (
         db.session.query(Professional)
-        .filter(Professional.is_approved == True)
+        .filter(Professional.is_approved == 1)
         .order_by(Professional.rating.desc())
         .limit(5)
         .all()
@@ -741,6 +781,8 @@ def get_services():
         {
             "id": service.id,
             "name": service.name,
+            "base_price": service.base_price,
+            "description": service.description,
             "numProfessionals": service.num_professionals
         }
         for service in services
@@ -754,6 +796,8 @@ def add_service():
         return jsonify({"error": "Service name is required"}), 400
 
     service_name = data['name']
+    base_price = data.get('base_price', 0)
+    description = data.get('description', '')
 
     # Count the number of professionals offering this service
     professional_count = Professional.query.filter_by(service=service_name).count()
@@ -761,6 +805,8 @@ def add_service():
     # Add the service to the Service table
     new_service = Service(
         name=service_name,
+        base_price=base_price,
+        description=description,
         num_professionals=professional_count
     )
     db.session.add(new_service)
@@ -780,6 +826,9 @@ def update_service(service_id):
     # Update the service name
     if 'name' in data:
         service.name = data['name']
+
+    if 'base_price' in data:
+        service.base_price = data['base_price']
 
     # Update the number of professionals based on the updated service name
     professional_count = Professional.query.filter_by(service=service.name).count()
@@ -816,6 +865,7 @@ def get_professional_analytics(professional_email):
         # Fetch service request counts
         pending_requests = ServiceRequest.query.filter_by(professional_id=professional.id, status="pending").count()
         accepted_requests = ServiceRequest.query.filter_by(professional_id=professional.id, status="accepted").count()
+        rejected_requests = ServiceRequest.query.filter_by(professional_id=professional.id, status="rejected").count()
         completed_requests = ServiceRequest.query.filter_by(professional_id=professional.id, is_completed=True).count()
 
         # Fetch feedback and calculate average rating
@@ -832,9 +882,10 @@ def get_professional_analytics(professional_email):
         analytics = {
             "professional_name": professional.name,
             # "rating": round(average_rating, 2),
-            "total_requests": pending_requests + accepted_requests + completed_requests,
+            "total_requests": pending_requests + accepted_requests + completed_requests+rejected_requests,
             "pending_requests": pending_requests,
             "accepted_requests": accepted_requests,
+            "rejected_requests": rejected_requests,
             "completed_requests": completed_requests,
             "feedbacks": feedback_list,
         }
@@ -842,6 +893,7 @@ def get_professional_analytics(professional_email):
         print(f"Analytics for {professional.name}:")
         print(f"Pending requests: {pending_requests}")
         print(f"Accepted requests: {accepted_requests}")
+        print(f"Rejected requests: {rejected_requests}")
         print(f"Completed requests: {completed_requests}")
         # print(f"Average rating: {average_rating}")
 
@@ -851,6 +903,8 @@ def get_professional_analytics(professional_email):
         # Handle unexpected errors
         print(f"Error fetching analytics: {e}")
         return jsonify({"error": str(e)}), 500
+
+
 
 
 
@@ -870,3 +924,22 @@ def get_services_by_user():
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+
+@app.route('/admin/feedbacks', methods=['GET'])
+def get_feedbacks():
+    feedbacks = Feedback.query.all()
+    feedback_data = []
+    
+    for feedback in feedbacks:
+        feedback_data.append({
+            "id": feedback.id,
+            "user": feedback.user.name if feedback.user else "Unknown User",
+            "professional": feedback.professional.name if feedback.professional else "Unknown Professional",
+            "service": feedback.professional.service if feedback.professional else "Unknown Service",
+            "service_date": feedback.created_at.strftime('%Y-%m-%d'),
+            "rating": feedback.rating,
+            "comments": feedback.comments
+        })
+    
+    return jsonify({"feedbacks": feedback_data})

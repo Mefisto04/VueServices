@@ -6,9 +6,10 @@ export default {
     services: [],
     newService: {
       name: "",
+      base_price: "",
       numProfessionals: 0,
     },
-    editingService: null, // To store the service being edited
+    editingService: null,
   }),
   methods: {
     getAdminData() {
@@ -24,8 +25,8 @@ export default {
           return res.json();
         })
         .then((data) => {
-          this.userList = data.users; // Store the fetched users
-          this.professionalList = data.professionals; // Store the fetched professionals
+          this.userList = data.users;
+          this.professionalList = data.professionals;
           this.professionalRequests = data.professionalRequests;
         })
         .catch((error) => {
@@ -50,14 +51,14 @@ export default {
         .then((data) => {
           if (data.success) {
             alert("Service added successfully!");
-            this.newService = { name: "" }; // Reset form
-            this.fetchServices(); // Refresh service list
+            this.newService = { name: "", base_price: "" };
+            this.fetchServices();
           }
         })
         .catch((err) => console.error("Error adding service:", err));
     },
     editService(service) {
-      this.editingService = { ...service }; // Copy service details for editing
+      this.editingService = { ...service };
     },
     updateService() {
       fetch(`/admin/services/${this.editingService.id}`, {
@@ -69,8 +70,8 @@ export default {
         .then((data) => {
           if (data.success) {
             alert("Service updated successfully!");
-            this.fetchServices(); // Refresh service list
-            this.editingService = null; // Reset editing
+            this.fetchServices();
+            this.editingService = null;
           }
         })
         .catch((err) => console.error("Error updating service:", err));
@@ -83,7 +84,7 @@ export default {
         .then((data) => {
           if (data.success) {
             alert("Service deleted successfully!");
-            this.fetchServices(); // Refresh service list
+            this.fetchServices();
           }
         })
         .catch((err) => console.error("Error deleting service:", err));
@@ -101,6 +102,10 @@ export default {
             <label for="service-name">Service Name:</label>
             <input v-model="newService.name" type="text" id="service-name" class="form-control" placeholder="Enter Service Name" required />
           </div>
+          <div class="form-group">
+            <label for="service-base-price">Service Base Price:</label>
+            <input v-model="newService.base_price" type="text" id="service-base-price" class="form-control" placeholder="Enter Service Base Price" required />
+          </div>
           <button type="submit" class="btn btn-primary mt-3">Add Service</button>
         </form>
       </div>
@@ -111,6 +116,7 @@ export default {
           <tr>
             <th>ID</th>
             <th>Name</th>
+            <th>Base Price</th>
             <th>No. of Professionals</th>
             <th>Actions</th>
           </tr>
@@ -121,6 +127,10 @@ export default {
             <td>
               <input v-if="editingService && editingService.id === service.id" v-model="editingService.name" class="form-control" />
               <span v-else>{{ service.name }}</span>
+            </td>
+            <td>
+              <input v-if="editingService && editingService.id === service.id" v-model="editingService.base_price" class="form-control" />
+              <span v-else>{{ service.base_price }}</span>
             </td>
             <td>{{ service.numProfessionals }}</td>
             <td>

@@ -409,6 +409,7 @@ export default {
                 <p class="card-text">Rating: {{ professional.rating || 'Not rated yet' }}</p>
                 <p class="card-text">Location: {{ professional.location }}</p>
                 <p class="card-text">Service: {{ professional.service }}</p>
+                <p class="card-text">Service Price: {{ professional.service_price }}</p>
                 <p class="card-text">Email: {{ professional.email }}</p>
                 <p class="card-text">Experience: {{ professional.experience }}</p>
                 <a v-if="professional.portfolio_url && professional.portfolio_url !== 'null'" 

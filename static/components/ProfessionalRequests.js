@@ -144,6 +144,7 @@ export default {
                     <h5 class="card-title">{{ professional.name }}</h5>
                     <p class="card-text">Email: {{ professional.email }}</p>
                     <p class="card-text">Service: {{ professional.service }}</p>
+                    <p class="card-text">Service Price: {{ professional.service_price }}</p>
                     <p class="card-text">Experience: {{ professional.experience }}</p>
                     <a v-if="professional.portfolio_url" :href="professional.portfolio_url" target="_blank" class="btn btn-primary">View Portfolio</a>
                     <button @click="approveProfessional(professional.id)" class="btn btn-success btn-sm mt-2">Approve</button>

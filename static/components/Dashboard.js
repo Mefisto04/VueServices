@@ -3,6 +3,7 @@ export default {
     professional: {
       name: localStorage.getItem("name") || "",
       email: localStorage.getItem("email") || "",
+      service: localStorage.getItem("service") || "",
       experience: localStorage.getItem("experience") || "",
       portfolio_url: localStorage.getItem("portfolioUrl") || "",
     },
@@ -35,6 +36,7 @@ export default {
           this.success = "Profile updated successfully!";
           localStorage.setItem("name", this.professional.name);
           localStorage.setItem("email", this.professional.email);
+          localStorage.setItem("service", this.professional.service);
           localStorage.setItem("experience", this.professional.experience);
           localStorage.setItem("portfolioUrl", this.professional.portfolio_url);
         } else {

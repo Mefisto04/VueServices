@@ -32,10 +32,10 @@ with app.app_context():
 
     # Create professional users
     professionals = [
-        {"name": "Professional One", "email": "professional1@gmail.com", "location": "Nagpur", "service": "Cleaning", "experience": "5 years", "portfolio_url": "https://portfolio-one.com", "fs_uniquifier": "professional1@gmail.com", "is_approved": True},
-        {"name": "Professional Two", "email": "professional2@gmail.com", "location": "Mumbai", "service": "Gardening", "experience": "3 years", "portfolio_url": "https://portfolio-two.com", "fs_uniquifier": "professional2@gmail.com", "is_approved": True},
-        {"name": "Professional Three", "email": "professional3@gmail.com", "location": "Jodhpur", "service": "Plumbing", "experience": "6 years", "portfolio_url": "https://portfolio-three.com", "fs_uniquifier": "professional3@gmail.com", "is_approved": True},
-        {"name": "Professional Four", "email": "professional4@gmail.com", "location": "Nagpur", "service": "Handyman", "experience": "4 years", "portfolio_url": "https://portfolio-four.com", "fs_uniquifier": "professional4@gmail.com", "is_approved": False},
+        {"name": "Professional One", "email": "professional1@gmail.com", "location": "Nagpur", "service": "Cleaning","service_price":"1150", "experience": "5 years", "portfolio_url": "https://portfolio-one.com", "fs_uniquifier": "professional1@gmail.com", "is_approved": 1},
+        {"name": "Professional Two", "email": "professional2@gmail.com", "location": "Mumbai", "service": "Gardening","service_price":"2350", "experience": "3 years", "portfolio_url": "https://portfolio-two.com", "fs_uniquifier": "professional2@gmail.com", "is_approved": 1},
+        {"name": "Professional Three", "email": "professional3@gmail.com", "location": "Jodhpur", "service": "Plumbing","service_price":"3170", "experience": "6 years", "portfolio_url": "https://portfolio-three.com", "fs_uniquifier": "professional3@gmail.com", "is_approved": 1},
+        {"name": "Professional Four", "email": "professional4@gmail.com", "location": "Nagpur", "service": "Handyman","service_price":"5550", "experience": "4 years", "portfolio_url": "https://portfolio-four.com", "fs_uniquifier": "professional4@gmail.com", "is_approved": 0},
     ]
 
     for professional_data in professionals:
@@ -46,6 +46,7 @@ with app.app_context():
                 password=generate_password_hash("12345678"),
                 location=professional_data["location"],
                 service=professional_data["service"],
+                service_price=professional_data["service_price"],
                 experience=professional_data["experience"],
                 portfolio_url=professional_data["portfolio_url"],
                 active=True,
@@ -82,14 +83,36 @@ with app.app_context():
 
     # Add predefined services
     services = [
-        {"name": "Cleaning"},
-        {"name": "Gardening"},
-        {"name": "Plumbing"},
-        {"name": "Electrical Work"},
-        {"name": "Handyman"},
-        {"name": "Painting"},
-        {"name": "Moving"},
-        {"name": "Others"},
+        {"name": "Cleaning",
+         "base_price": 1000,
+         "description": "Cleaning service description",
+        },
+        {"name": "Gardening",
+         "base_price": 2000,
+         "description": "Gardening service description",
+         },
+        {"name": "Plumbing",
+         "base_price": 3000,
+            "description": "Plumbing service description",
+         },
+        {"name": "Electrical Work",
+         "base_price": 4000,
+         "description": "Electrical work service description",},
+        {"name": "Handyman",
+         "base_price": 5000,
+         "description": "Handyman service description",},
+        {"name": "Painting",
+         "base_price": 6000,
+         "description": "Painting service description",
+        },
+        {"name": "Moving",
+            "base_price": 7000,
+            "description": "Moving service description",
+        },
+        {"name": "Others",
+         "base_price": 8000,
+         "description": "Others service description",
+        },
     ]
 
     for service_data in services:
@@ -97,6 +120,8 @@ with app.app_context():
             service_count = Professional.query.filter_by(service=service_data["name"]).count()
             service = Service(
                 name=service_data["name"],
+                base_price=service_data["base_price"],
+                description=service_data["description"],
                 num_professionals=service_count
             )
             db.session.add(service)
