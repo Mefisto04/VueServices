@@ -375,72 +375,72 @@ export default {
     this.getAllServiceRequests();
   },
   template: `
-  <div class="px-3 mt-3 pb-5">
-    <button class="btn btn-primary mt-3" @click="getUserDashboard">Get User Dashboard</button>
-    <br />
-    <br />
-    <div class="modal" v-if="showEditModal">
-      <div class="modal-content">
-        <h4>Edit Service Date</h4>
-        <label>New Service Date:</label>
-        <input type="date" v-model="editServiceDate" />
-        <button class="btn btn-primary" @click="updateServiceRequestDate">Save</button>
-        <button class="btn btn-secondary" @click="showEditModal = false">Cancel</button>
+    <div class="px-3 mt-3 pb-5">
+      <button class="btn btn-primary mt-3" @click="getUserDashboard">Get User Dashboard</button>
+      <br />
+      <br />
+      <div class="modal" v-if="showEditModal">
+        <div class="modal-content">
+          <h4>Edit Service Date</h4>
+          <label>New Service Date:</label>
+          <input type="date" v-model="editServiceDate" />
+          <button class="btn btn-primary" @click="updateServiceRequestDate">Save</button>
+          <button class="btn btn-secondary" @click="showEditModal = false">Cancel</button>
+        </div>
       </div>
-    </div>
-
-    <!-- Upcoming Services Section -->
-    <h3>Upcoming Services</h3>
-    <div class="container bg-light p-4 rounded shadow-sm my-3">
-      <div class="row ">
-        <div class="col-lg-4" v-for="request in serviceRequests" :key="request.id" v-if="request.status === 'pending'">
-          <div class="card">
-            <div class="card-body">
-              <h5>Professional ID: {{ request.professional_id }}</h5>
-              <p>Service Date: {{ new Date(request.service_date).toLocaleDateString() }}</p>
-              <p>Status: {{ request.status }}</p>
-              <div class="form-group mt-2">
-                <label for="serviceDate">Select Date and Time:</label>
-                <input
-                  type="datetime-local"
-                  v-model="request.serviceDate"
-                  class="form-control mt-3"
-                />
+  
+      <!-- Upcoming Services Section -->
+      <h3>Upcoming Services</h3>
+      <div class="container bg-light p-4 rounded shadow-sm my-3">
+        <div class="row ">
+          <div class="col-lg-4" v-for="request in serviceRequests" :key="request.id" v-if="request.status === 'pending'">
+            <div class="card">
+              <div class="card-body">
+                <h5>Professional ID: {{ request.professional_id }}</h5>
+                <p>Service Date: {{ new Date(request.service_date).toLocaleDateString() }}</p>
+                <p>Status: {{ request.status }}</p>
+                <div class="form-group mt-2">
+                  <label for="serviceDate">Select Date and Time:</label>
+                  <input
+                    type="datetime-local"
+                    v-model="request.serviceDate"
+                    class="form-control mt-3"
+                  />
+                </div>
+                <button
+                  class="btn btn-warning btn-sm mt-2"
+                  @click="submitServiceDate(request.id, serviceDate)"
+                >
+                  Submit Service Date
+                </button>
               </div>
-              <button
-                class="btn btn-warning btn-sm mt-2"
-                @click="submitServiceDate(request.id, serviceDate)"
-              >
-                Submit Service Date
-              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Accepted Services Section -->
+      <h3>Accepted Services</h3>
+      <div class="container2 p-4 rounded shadow-sm my-3">
+        <div class="row">
+          <div class="col-lg-4" v-for="request in serviceRequests" :key="request.id" v-if="request.status === 'accepted'">
+            <div class="card">
+              <div class="card-body">
+                <h5>Professional ID: {{ request.professional_id }}</h5>
+                <p>Service Date: {{ new Date(request.service_date).toLocaleDateString() }}</p>
+                <p>Status: {{ request.status }}</p>
+                <button
+                  class="btn btn-success mt-2"
+                  @click="updateRequestStatus(request.id, 'completed')"
+                >
+                  Mark as Completed
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Accepted Services Section -->
-    <h3>Accepted Services</h3>
-    <div class="container2 p-4 rounded shadow-sm my-3">
-      <div class="row">
-        <div class="col-lg-4" v-for="request in serviceRequests" :key="request.id" v-if="request.status === 'accepted'">
-          <div class="card">
-            <div class="card-body">
-              <h5>Professional ID: {{ request.professional_id }}</h5>
-              <p>Service Date: {{ new Date(request.service_date).toLocaleDateString() }}</p>
-              <p>Status: {{ request.status }}</p>
-              <button
-                class="btn btn-success mt-2"
-                @click="updateRequestStatus(request.id, 'completed')"
-              >
-                Mark as Completed
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  `,
+  
+    `,
 };

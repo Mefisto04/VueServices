@@ -5,7 +5,10 @@
   background-color: rgb(255, 255, 255);
   height: 100vh;
 }
-
+.container2 {
+  background-color: rgba(190, 255, 255, 0.355);
+  min-height: 50vh;
+}
 .min-vh {
   min-height: 100vh;
 }
@@ -100,7 +103,6 @@
   justify-content: space-between;
 }
 
-
 .nav-link {
   transition: color 0.3s;
 }
@@ -117,7 +119,7 @@
   background-color: #5e0797; /* Change button background on hover */
   color: white; /* Change button text color on hover */
 }
-.container-fluid{
+.container-fluid {
   display: flex;
   justify-content: space-around;
   gap: 20px;

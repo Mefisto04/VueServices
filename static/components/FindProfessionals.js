@@ -119,10 +119,11 @@ export default {
     },
     requestService(professionalId) {
       const userId = localStorage.getItem("userId");
+      const selectedServiceDate = this.serviceDates[professionalId];
       console.log("User ID:", userId);
-      console.log("Selected service date:", this.serviceDate);
+      console.log("Selected service date:", selectedServiceDate);
 
-      if (!this.serviceDate) {
+      if (!selectedServiceDate || selectedServiceDate.trim() === "") {
         console.error("Service date is not set");
         return;
       }
@@ -130,7 +131,7 @@ export default {
       const requestPayload = {
         userId: userId,
         professional_id: professionalId,
-        service_date: this.serviceDate,
+        service_date: selectedServiceDate,
       };
 
       console.log("Request Payload:", requestPayload);

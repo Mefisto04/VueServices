@@ -465,16 +465,24 @@ def get_service_requests(user_id):
         'service_date': req.service_date.isoformat(),
         'status': req.status,
         'request_date': req.request_date.isoformat(),
+        'is_completed': req.is_completed
     } for req in requests]), 200
 
 
+
+from sqlalchemy import and_
 @app.route('/api/feedback', methods=['POST'])
 def submit_feedback():
     data = request.get_json()
     user_id = data.get('userId')
     professional_id = data.get('professionalId')
+    print(f"Professional ID after feedback submission: {professional_id}")
+    print(f"User IDafter feedback submission : {user_id}")
     rating = data.get('rating')
     comments = data.get('comments')
+    service_date = data.get('service_date')
+    service_date = datetime.strptime(service_date, '%Y-%m-%dT%H:%M:%S') 
+    print(f"Service date after feedback submission: {service_date}")
     user = User.query.filter_by(fs_uniquifier=user_id).first() 
 
     if not all([user_id, professional_id, rating]):
@@ -489,10 +497,24 @@ def submit_feedback():
     
     db.session.add(new_feedback)
 
-    service_request = ServiceRequest.query.filter_by(user_id=user.id, professional_id=professional_id).first()
-    if service_request:
-        service_request.is_completed = True  
-        db.session.commit() 
+
+    print(f"User ID: {user.id}, Professional ID: {professional_id}, Service Date: {service_date}")
+
+    service_request = ServiceRequest.query.filter(
+        and_(
+            ServiceRequest.user_id == user.id,
+            ServiceRequest.professional_id == professional_id,
+            ServiceRequest.service_date.between(service_date - timedelta(minutes=1), service_date + timedelta(minutes=1))
+        )
+    ).first()
+
+    print(f"Service request found: {service_request}")
+
+    if not service_request:
+        return jsonify({'error': 'No matching service request found for the given details'}), 404
+
+    service_request.is_completed = True
+    db.session.commit()
 
     db.session.commit()
 
@@ -507,8 +529,17 @@ def submit_feedback():
     }), 201
 
 
+from flask import send_file
+import matplotlib.pyplot as plt
+import io
+import base64
+from matplotlib.figure import Figure
+import json
+
+# Modified route to return both data and chart for top professionals
 @app.route('/api/top-rated-professionals', methods=['GET'])
 def top_rated_professionals():
+    # Get data from database
     top_professionals = (
         db.session.query(Professional)
         .filter(Professional.is_approved == True)
@@ -516,13 +547,37 @@ def top_rated_professionals():
         .limit(5)
         .all()
     )
-    top_professionals_data = [
-        {'name': professional.name, 'rating': professional.rating} for professional in top_professionals
-    ]
-    return jsonify(top_professionals_data)
+    
+    # Prepare data
+    names = [p.name for p in top_professionals]
+    ratings = [p.rating for p in top_professionals]
+    
+    # Create the chart
+    fig = Figure(figsize=(10, 6))
+    ax = fig.add_subplot(111)
+    ax.bar(names, ratings, color='skyblue')
+    ax.set_title('Top 5 Rated Professionals')
+    ax.set_ylabel('Rating')
+    plt.xticks(rotation=45)
+    
+    # Save chart to bytes
+    buf = io.BytesIO()
+    fig.savefig(buf, format='png', bbox_inches='tight')
+    buf.seek(0)
+    chart_data = base64.b64encode(buf.getvalue()).decode('utf-8')
+    
+    # Prepare response data
+    response_data = {
+        'chart': chart_data,
+        'data': [{'name': p.name, 'rating': p.rating} for p in top_professionals]
+    }
+    
+    return jsonify(response_data)
 
+# Modified route for most booked services
 @app.route('/api/most-booked-services', methods=['GET'])
 def most_booked_services():
+    # Get data from database
     most_booked = (
         db.session.query(Professional.service, func.count(ServiceRequest.id).label("service_count"))
         .join(ServiceRequest, ServiceRequest.professional_id == Professional.id)
@@ -531,15 +586,36 @@ def most_booked_services():
         .limit(5)
         .all()
     )
-    most_booked_services_data = [{'service': service, 'count': count} for service, count in most_booked]
-    return jsonify(most_booked_services_data)
+    
+    # Prepare data
+    services = [service for service, _ in most_booked]
+    counts = [count for _, count in most_booked]
+    
+    # Create pie chart
+    fig = Figure(figsize=(10, 10))
+    ax = fig.add_subplot(111)
+    ax.pie(counts, labels=services, autopct='%1.1f%%')
+    ax.set_title('Most Booked Services')
+    
+    # Save chart to bytes
+    buf = io.BytesIO()
+    fig.savefig(buf, format='png', bbox_inches='tight')
+    buf.seek(0)
+    chart_data = base64.b64encode(buf.getvalue()).decode('utf-8')
+    
+    # Prepare response data
+    response_data = {
+        'chart': chart_data,
+        'data': [{'service': service, 'count': count} for service, count in most_booked]
+    }
+    
+    return jsonify(response_data)
 
-@app.route('/api/user-professional-counts', methods=['GET'])
-def user_professional_counts():
-    user_count = db.session.query(func.count(User.id)).scalar()
-    professional_count = db.session.query(func.count(Professional.id)).scalar()
+@app.route('/api/user-professional-counts', methods=['GET']) 
+def user_professional_counts():     
+    user_count = db.session.query(func.count(User.id)).scalar()     
+    professional_count = db.session.query(func.count(Professional.id)).scalar()     
     return jsonify({'user_count': user_count, 'professional_count': professional_count})
-
 
 
 import csv

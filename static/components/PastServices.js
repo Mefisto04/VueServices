@@ -51,21 +51,6 @@ export default {
           console.error("Error fetching professionals:", error);
         });
     },
-    fetchLocations() {
-      fetch("location.json")
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error("Failed to load locations from location.json");
-          }
-          return res.json();
-        })
-        .then((data) => {
-          this.locations = data.locations; // Assuming location.json has a "locations" key
-        })
-        .catch((error) => {
-          console.error("Error fetching locations:", error);
-        });
-    },
     filterProfessionals() {
       this.filteredProfessionalList = this.professionalList.filter(
         (professional) => {
@@ -170,6 +155,7 @@ export default {
     showFeedbackForm(request) {
       this.showFeedback = true;
       this.feedbackProfessionalId = request.professional_id;
+      this.serviceDate = request.service_date;
     },
     cancelFeedback() {
       this.showFeedback = false;
@@ -183,6 +169,7 @@ export default {
         professionalId: this.feedbackProfessionalId,
         rating: this.feedbackRating,
         comments: this.feedbackComments,
+        service_date: this.serviceDate,
       };
 
       fetch("/api/feedback", {
@@ -381,45 +368,187 @@ export default {
   created() {
     this.getAllProfessionals();
     this.getAllServiceRequests();
-    this.fetchLocations();
   },
   template: `
-      <div class="px-3 mt-3 pb-5">
-
-  
-        <h3 class="mb-4">Past Services</h3>
-        <div class="row">
-          <div class="col-lg-4" v-for="(request, k) in serviceRequests" :key="request.id" v-if="request.status == 'completed'">
-            <div class="card shadow-sm mb-3" style="border-radius: 10px;">
-              <div class="card-body text-center">
-                <h5 class="card-title">Service Request to Professional ID: {{ request.professional_id }}</h5>
-                <p class="card-text">Service Date: {{ new Date(request.service_date).toLocaleString() }}</p>
-                <p class="card-text">Status: {{ request.status }}</p>
-                <button  class="btn btn-primary" @click="showFeedbackForm(request)">Give Feedback</button>
-              </div>
+  <div class="px-3 mt-3 pb-5">
+    <h3 class="mb-4" style="color: #333; font-weight: 600;">Past Services</h3>
+    
+    <!-- Service Cards -->
+    <div class="row">
+      <div class="col-lg-4" v-for="(request, k) in serviceRequests" :key="request.id" v-if="request.status == 'completed'">
+        <div class="card mb-4" style="
+          border: none;
+          border-radius: 15px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+          transition: transform 0.2s ease;
+          background: white;
+          overflow: hidden;
+        "
+        onmouseover="this.style.transform='translateY(-5px)'"
+        onmouseout="this.style.transform='translateY(0)'">
+          <div class="card-body" style="padding: 1.5rem;">
+            <h5 class="card-title" style="
+              color: #2c3e50;
+              font-size: 1.1rem;
+              font-weight: 600;
+              margin-bottom: 1rem;
+              text-align: center;
+            ">Service Request to Professional ID: {{ request.professional_id }}</h5>
+            
+            <div style="
+              background-color: #f8f9fa;
+              padding: 0.8rem;
+              border-radius: 8px;
+              margin-bottom: 1rem;
+            ">
+              <p class="card-text" style="
+                margin: 0;
+                color: #6c757d;
+                font-size: 0.9rem;
+              ">Service Date: {{ new Date(request.service_date).toLocaleString() }}</p>
             </div>
+            
+            <div style="
+              background-color: #e8f4ff;
+              padding: 0.5rem;
+              border-radius: 8px;
+              margin-bottom: 1rem;
+            ">
+              <p class="card-text" style="
+                margin: 0;
+                color: #0056b3;
+                font-weight: 500;
+                text-align: center;
+              ">Status: {{ request.status }}</p>
+            </div>
+            
+            <button  v-if="!request.is_completed" class="btn btn-primary"  @click="showFeedbackForm(request)" style="
+              width: 100%;
+              background-color: #007bff;
+              border: none;
+              padding: 0.8rem;
+              border-radius: 8px;
+              font-weight: 500;
+              transition: background-color 0.2s ease;
+            "
+            onmouseover="this.style.backgroundColor='#0056b3'"
+            onmouseout="this.style.backgroundColor='#007bff'">
+              Give Feedback
+            </button>
           </div>
-        </div>
-  
-        <hr/>
-  
-        
-  
-  
-        <!-- Feedback Form -->
-        <div v-if="showFeedback" class="feedback-form">
-          <h4>Feedback for Professional ID: {{ feedbackProfessionalId }}</h4>
-          <div>
-            <label>Rating (0-10):</label>
-            <input type="number" v-model="feedbackRating" min="0" max="10" />
-          </div>
-          <div>
-            <label>Comments:</label>
-            <textarea v-model="feedbackComments"></textarea>
-          </div>
-          <button class="btn btn-success" @click="submitFeedback">Submit Feedback</button>
-          <button class="btn btn-secondary" @click="cancelFeedback">Cancel</button>
         </div>
       </div>
-    `,
+    </div>
+
+    <hr style="margin: 2rem 0; border-color: #dee2e6;"/>
+
+    <!-- Feedback Form Modal -->
+    <div v-if="showFeedback" style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    ">
+      <div style="
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      ">
+        <h4 style="
+          color: #2c3e50;
+          margin-bottom: 1.5rem;
+          font-weight: 600;
+          text-align: center;
+        ">Feedback for Professional ID: {{ feedbackProfessionalId }}</h4>
+        
+        <div style="margin-bottom: 1.5rem;">
+          <label style="
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #495057;
+            font-weight: 500;
+          ">Rating (0-10):</label>
+          <input type="number" 
+            v-model="feedbackRating" 
+            min="0" 
+            max="10" 
+            style="
+              width: 100%;
+              padding: 0.8rem;
+              border: 2px solid #dee2e6;
+              border-radius: 8px;
+              font-size: 1rem;
+              transition: border-color 0.2s ease;
+            "
+            onmouseover="this.style.borderColor='#007bff'"
+            onmouseout="this.style.borderColor='#dee2e6'"
+          />
+        </div>
+        
+        <div style="margin-bottom: 1.5rem;">
+          <label style="
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #495057;
+            font-weight: 500;
+          ">Comments:</label>
+          <textarea 
+            v-model="feedbackComments"
+            style="
+              width: 100%;
+              padding: 0.8rem;
+              border: 2px solid #dee2e6;
+              border-radius: 8px;
+              min-height: 100px;
+              font-size: 1rem;
+              resize: vertical;
+              transition: border-color 0.2s ease;
+            "
+            onmouseover="this.style.borderColor='#007bff'"
+            onmouseout="this.style.borderColor='#dee2e6'"
+          ></textarea>
+        </div>
+        
+        <div style="
+          display: flex;
+          justify-content: flex-end;
+          gap: 1rem;
+        ">
+          <button class="btn btn-secondary" 
+            @click="cancelFeedback"
+            style="
+              padding: 0.8rem 1.5rem;
+              border-radius: 8px;
+              font-weight: 500;
+              border: none;
+              transition: background-color 0.2s ease;
+            "
+          >Cancel</button>
+          <button class="btn btn-success" 
+            @click="submitFeedback"
+            style="
+              padding: 0.8rem 1.5rem;
+              border-radius: 8px;
+              font-weight: 500;
+              border: none;
+              background-color: #28a745;
+              transition: background-color 0.2s ease;
+            "
+            onmouseover="this.style.backgroundColor='#218838'"
+            onmouseout="this.style.backgroundColor='#28a745'"
+          >Submit Feedback</button>
+        </div>
+      </div>
+    </div>
+  </div>
+`,
 };

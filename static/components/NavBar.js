@@ -74,7 +74,7 @@ export default {
                 <router-link to="/find-professionals" tag="a" class="nav-link">Find Professionals</router-link>
               </li>
               <li class="nav-item">
-                <router-link to="/services" tag="a" class="nav-link">Services</router-link>
+                <router-link to="/user-services" tag="a" class="nav-link">Services</router-link>
               </li>
               <li class="nav-item">
                 <router-link to="/past-services" tag="a" class="nav-link">Past Services</router-link>
