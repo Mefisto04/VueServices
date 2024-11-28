@@ -148,8 +148,10 @@ export default {
             <p class="card-text">Email: {{ request.user.user_email }}</p>
             <p class="card-text">Status: <span :class="{ accepted: request.status === 'accepted', rejected: request.status === 'rejected' }">{{ request.status }}</span></p>
             <p class="card-text">Service Date: {{ new Date(request.service_date).toLocaleString() }}</p>
+            <div v-if="request.status !== 'rejected'">
             <button v-if="request.status !== 'accepted' && request.status !== 'completed'" class="btn btn-success btn-sm" @click="updateRequestStatus(request.request_id, 'accepted')">Accept</button>
             <button v-if="request.status !== 'rejected' && request.status !== 'completed'" class="btn btn-danger btn-sm" @click="updateRequestStatus(request.request_id, 'rejected')">Reject</button>
+            </div>
           </div>
         </div>
       </div>

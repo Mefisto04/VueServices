@@ -11,14 +11,51 @@ export default {
     requests: [],
     error: "",
     success: "",
+    services: [], // List of services fetched from the backend
+    invalidServiceError: false, // Flag for invalid service error
   }),
   methods: {
+    async fetchServices() {
+      try {
+        const response = await fetch("/api/services");
+        const data = await response.json();
+        if (response.ok) {
+          this.services = data.services;
+          this.checkServiceValidity();
+        } else {
+          this.error = "Failed to load services.";
+        }
+      } catch (err) {
+        this.error = "An error occurred while fetching services.";
+      }
+    },
+    checkServiceValidity() {
+      const isValidService = this.services.some(
+        (service) => service.name === this.professional.service
+      );
+      if (!isValidService) {
+        this.invalidServiceError = true;
+        this.error =
+          "The service you are using is no longer available. Please update your service as soon as possible.";
+      } else {
+        this.invalidServiceError = false;
+        this.error = ""; // Clear error if the service is valid
+      }
+    },
     async updateProfessional() {
       const professionalId = localStorage.getItem("professionalId");
-      console.log("Professional Uniquifier:", professionalId);
-
       if (!professionalId || professionalId === "undefined") {
         this.error = "Professional ID is missing. Please log in again.";
+        return;
+      }
+
+      // Validate the selected service
+      const selectedService = this.services.find(
+        (service) => service.name === this.professional.service
+      );
+      if (!selectedService) {
+        this.error =
+          "The selected service is invalid. Please choose a valid service.";
         return;
       }
 
@@ -53,7 +90,9 @@ export default {
       }
     },
   },
-  mounted() {},
+  mounted() {
+    this.fetchServices(); // Fetch services on component mount
+  },
   template: `
       <div class="container my-4">
         <h2 class="text-center mb-4">Professional Dashboard</h2>
@@ -72,7 +111,12 @@ export default {
             </div>
             <div class="form-group">
               <label for="service">Service</label>
-              <input v-model="professional.service" type="text" class="form-control" id="service" placeholder="Enter service" required>
+              <select v-model="professional.service" class="form-control" id="service" required>
+                <option value="" disabled>Select a service</option>
+                <option v-for="service in services" :key="service.id" :value="service.name">
+                  {{ service.name }}
+                </option>
+              </select>
             </div>
             <div class="form-group">
               <label for="service_price">Service Price</label>

@@ -375,7 +375,7 @@ export default {
     
     <!-- Service Cards -->
     <div class="row">
-      <div class="col-lg-4" v-for="(request, k) in serviceRequests" :key="request.id" v-if="request.status == 'completed'">
+      <div class="col-lg-3" v-for="(request, k) in serviceRequests" :key="request.id" v-if="request.status == 'completed' || 'rejected'">
         <div class="card mb-4" style="
           border: none;
           border-radius: 15px;
@@ -408,21 +408,26 @@ export default {
               ">Service Date: {{ new Date(request.service_date).toLocaleString() }}</p>
             </div>
             
-            <div style="
-              background-color: #e8f4ff;
-              padding: 0.5rem;
-              border-radius: 8px;
-              margin-bottom: 1rem;
-            ">
-              <p class="card-text" style="
-                margin: 0;
-                color: #0056b3;
-                font-weight: 500;
-                text-align: center;
-              ">Status: {{ request.status }}</p>
+            <div
+            :style="{
+              backgroundColor: request.status === 'rejected' ? '#ffcccc' : '#e8f4ff',
+              padding: '0.5rem',
+              borderRadius: '8px',
+              marginBottom: '1rem',
+            }"
+          >
+            <p
+              class="card-text"
+              :style="{
+                margin: 0,
+                color: request.status === 'rejected' ? '#cc0000' : '#0056b3',
+                fontWeight: '500',
+                textAlign: 'center',
+              }"
+            >Status: {{ request.status }}</p>
             </div>
             
-            <button  v-if="!request.is_completed" class="btn btn-primary"  @click="showFeedbackForm(request)" style="
+            <button   v-if="request.status === 'completed' && !request.is_completed" class="btn btn-primary"  @click="showFeedbackForm(request)" style="
               width: 100%;
               background-color: #007bff;
               border: none;
