@@ -32,11 +32,18 @@ with app.app_context():
 
     # Create professional users
     professionals = [
-        {"name": "Professional One", "email": "professional1@gmail.com", "location": "Nagpur", "service": "Cleaning","service_price":"1150", "experience": "5 years", "portfolio_url": "https://portfolio-one.com", "fs_uniquifier": "professional1@gmail.com", "is_approved": 1},
-        {"name": "Professional Two", "email": "professional2@gmail.com", "location": "Mumbai", "service": "Gardening","service_price":"2350", "experience": "3 years", "portfolio_url": "https://portfolio-two.com", "fs_uniquifier": "professional2@gmail.com", "is_approved": 1},
-        {"name": "Professional Three", "email": "professional3@gmail.com", "location": "Jodhpur", "service": "Plumbing","service_price":"3170", "experience": "6 years", "portfolio_url": "https://portfolio-three.com", "fs_uniquifier": "professional3@gmail.com", "is_approved": 1},
-        {"name": "Professional Four", "email": "professional4@gmail.com", "location": "Nagpur", "service": "Handyman","service_price":"5550", "experience": "4 years", "portfolio_url": "https://portfolio-four.com", "fs_uniquifier": "professional4@gmail.com", "is_approved": 0},
-    ]
+    {"name": "Rahul Arora", "email": "rahularora@gmail.com", "location": "Nagpur", "service": "Cleaning", "service_price": "1150", "experience": "5 years", "portfolio_url": "https://portfolio-one.com", "fs_uniquifier": "rahularora@gmail.com", "is_approved": 1},
+    {"name": "Sumit Arora", "email": "sumitarora@gmail.com", "location": "Mumbai", "service": "Gardening", "service_price": "2350", "experience": "3 years", "portfolio_url": "https://portfolio-two.com", "fs_uniquifier": "sumitarora@gmail.com", "is_approved": 1},
+    {"name": "Uday Singh", "email": "udaysingh@gmail.com", "location": "Jodhpur", "service": "Plumbing", "service_price": "3170", "experience": "6 years", "portfolio_url": "https://portfolio-three.com", "fs_uniquifier": "udaysingh@gmail.com", "is_approved": 1},
+    {"name": "Tina Singh", "email": "tinasingh@gmail.com", "location": "Nagpur", "service": "Handyman", "service_price": "5550", "experience": "4 years", "portfolio_url": "https://portfolio-four.com", "fs_uniquifier": "tinasingh@gmail.com", "is_approved": 0},
+    {"name": "Amit Verma", "email": "amitverma@gmail.com", "location": "Delhi", "service": "Electrician", "service_price": "2000", "experience": "7 years", "portfolio_url": "https://portfolio-five.com", "fs_uniquifier": "amitverma@gmail.com", "is_approved": 1},
+    {"name": "Sneha Sharma", "email": "snehasharma@gmail.com", "location": "Pune", "service": "Painting", "service_price": "4500", "experience": "5 years", "portfolio_url": "https://portfolio-six.com", "fs_uniquifier": "snehasharma@gmail.com", "is_approved": 1},
+    {"name": "Karan Mehta", "email": "karanmehta@gmail.com", "location": "Ahmedabad", "service": "Carpentry", "service_price": "3200", "experience": "4 years", "portfolio_url": "https://portfolio-seven.com", "fs_uniquifier": "karanmehta@gmail.com", "is_approved": 1},
+    {"name": "Priya Das", "email": "priyadas@gmail.com", "location": "Bangalore", "service": "Interior Design", "service_price": "6000", "experience": "8 years", "portfolio_url": "https://portfolio-eight.com", "fs_uniquifier": "priyadas@gmail.com", "is_approved": 1},
+    {"name": "Manoj Kumar", "email": "manojkumar@gmail.com", "location": "Chennai", "service": "Landscaping", "service_price": "3500", "experience": "6 years", "portfolio_url": "https://portfolio-nine.com", "fs_uniquifier": "manojkumar@gmail.com", "is_approved": 0},
+    {"name": "Richa Jain", "email": "richajain@gmail.com", "location": "Hyderabad", "service": "Photography", "service_price": "8000", "experience": "10 years", "portfolio_url": "https://portfolio-ten.com", "fs_uniquifier": "richajain@gmail.com", "is_approved": 1}
+]
+
 
     for professional_data in professionals:
         if not db.session.query(Professional).filter_by(email=professional_data["email"]).first():
@@ -63,10 +70,18 @@ with app.app_context():
 
     # Create member users
     members = [
-        {"name": "User 1", "email": "user1@gmail.com", "fs_uniquifier": "user1@gmail.com"},
-        {"name": "User 2", "email": "user2@gmail.com", "fs_uniquifier": "user2@gmail.com"},
-        {"name": "User 3", "email": "user3@gmail.com", "fs_uniquifier": "user3@gmail.com"},
+    {"name": "Alice Johnson", "email": "alicejohnson@gmail.com", "fs_uniquifier": "alicejohnson@gmail.com"},
+    {"name": "Bob Smith", "email": "bobsmith@gmail.com", "fs_uniquifier": "bobsmith@gmail.com"},
+    {"name": "Charlie Brown", "email": "charliebrown@gmail.com", "fs_uniquifier": "charliebrown@gmail.com"},
+    {"name": "Diana Lee", "email": "dianalee@gmail.com", "fs_uniquifier": "dianalee@gmail.com"},
+    {"name": "Edward Miller", "email": "edwardmiller@gmail.com", "fs_uniquifier": "edwardmiller@gmail.com"},
+    {"name": "Fiona Carter", "email": "fionacarter@gmail.com", "fs_uniquifier": "fionacarter@gmail.com"},
+    {"name": "George Harris", "email": "georgeharris@gmail.com", "fs_uniquifier": "georgeharris@gmail.com"},
+    {"name": "Hannah Wilson", "email": "hannahwilson@gmail.com", "fs_uniquifier": "hannahwilson@gmail.com"},
+    {"name": "Ian Wright", "email": "ianwright@gmail.com", "fs_uniquifier": "ianwright@gmail.com"},
+    {"name": "Julia Roberts", "email": "juliaroberts@gmail.com", "fs_uniquifier": "juliaroberts@gmail.com"}
     ]
+
 
     for member_data in members:
         if not db.session.query(User).filter_by(email=member_data["email"]).first():
@@ -127,41 +142,95 @@ with app.app_context():
             db.session.add(service)
             db.session.commit()
 
-    # Create service requests and feedback
-    user1 = db.session.query(User).filter_by(email="user1@gmail.com").first()
-    user2 = db.session.query(User).filter_by(email="user2@gmail.com").first()
-    professional1 = db.session.query(Professional).filter_by(email="professional1@gmail.com").first()
-    professional2 = db.session.query(Professional).filter_by(email="professional2@gmail.com").first()
 
-    # Pending service request
-    service_request1 = ServiceRequest(
-        user_id=user1.id,
-        professional_id=professional1.id,
-        status="pending",
-        service_date=datetime.now() + timedelta(days=3)
-    )
-    db.session.add(service_request1)
+    # Retrieve users and professionals
+    user1 = db.session.query(User).filter_by(email="alicejohnson@gmail.com").first()
+    user2 = db.session.query(User).filter_by(email="bobsmith@gmail.com").first()
+    user3 = db.session.query(User).filter_by(email="charliebrown@gmail.com").first()
+    user4 = db.session.query(User).filter_by(email="dianalee@gmail.com").first()
 
-    # Completed service request with feedback
-    service_request2 = ServiceRequest(
-        user_id=user2.id,
-        professional_id=professional2.id,
-        status="completed",
-        service_date=datetime.now() - timedelta(days=5)
-    )
-    db.session.add(service_request2)
+    professional1 = db.session.query(Professional).filter_by(email="rahularora@gmail.com").first()
+    professional2 = db.session.query(Professional).filter_by(email="sumitarora@gmail.com").first()
+    professional3 = db.session.query(Professional).filter_by(email="udaysingh@gmail.com").first()
+    professional4 = db.session.query(Professional).filter_by(email="amitverma@gmail.com").first()
+
+    # Accepted and completed service requests with feedback
+    service_requests = [
+        ServiceRequest(
+            user_id=user1.id,
+            professional_id=professional1.id,
+            status="completed",
+            service_date=datetime.now() - timedelta(days=10)
+        ),
+        ServiceRequest(
+            user_id=user2.id,
+            professional_id=professional2.id,
+            status="completed",
+            service_date=datetime.now() - timedelta(days=8)
+        ),
+        ServiceRequest(
+            user_id=user3.id,
+            professional_id=professional3.id,
+            status="completed",
+            service_date=datetime.now() - timedelta(days=7)
+        ),
+        ServiceRequest(
+            user_id=user4.id,
+            professional_id=professional4.id,
+            status="completed",
+            service_date=datetime.now() - timedelta(days=6)
+        )
+    ]
+
+    # Add service requests to the session
+    for service_request in service_requests:
+        db.session.add(service_request)
+
+    # Commit service requests
     db.session.commit()
 
-    feedback = Feedback(
-        user_id=user2.id,
-        professional_id=professional2.id,
-        rating=9,
-        comments="Excellent service!"
-    )
-    db.session.add(feedback)
+    # Adding feedback for completed requests
+    feedbacks = [
+        Feedback(
+            user_id=user1.id,
+            professional_id=professional1.id,
+            rating=10,
+            comments="Outstanding work!"
+        ),
+        Feedback(
+            user_id=user2.id,
+            professional_id=professional2.id,
+            rating=9,
+            comments="Excellent service, very professional!"
+        ),
+        Feedback(
+            user_id=user3.id,
+            professional_id=professional3.id,
+            rating=8,
+            comments="Good work but a little late."
+        ),
+        Feedback(
+            user_id=user4.id,
+            professional_id=professional4.id,
+            rating=7,
+            comments="Decent service, could improve communication."
+        )
+    ]
+
+    # Add feedback to the session
+    for feedback in feedbacks:
+        db.session.add(feedback)
+
+    # Commit feedbacks
     db.session.commit()
 
-    professional2.update_rating()  # Update professional's average rating
+    # Update professional ratings
+    professionals = [professional1, professional2, professional3, professional4]
+    for professional in professionals:
+        professional.update_rating()
+
+    # Commit rating updates
     db.session.commit()
+
 
 print("Setup completed!")
