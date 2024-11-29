@@ -666,7 +666,6 @@ from datetime import datetime
 
 @app.route('/api/export-completed-services', methods=['GET'])
 def export_completed_services():
-    # Query to fetch completed service requests along with user, professional, service details, feedback
     completed_requests = db.session.query(
         ServiceRequest, User, Professional, Feedback
     ).join(User, User.id == ServiceRequest.user_id) \

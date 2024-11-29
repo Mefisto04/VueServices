@@ -32,6 +32,13 @@ export default {
         console.error("Error fetching analytics data:", error);
       }
     },
+    downloadCSV() {
+      // Trigger the download by creating a temporary link
+      const link = document.createElement("a");
+      link.href = "/api/export-completed-services"; // The route that generates the CSV
+      link.download = "completed_services.csv"; // Filename for the downloaded file
+      link.click();
+    },
   },
   created() {
     this.fetchAnalyticsData();
@@ -39,6 +46,9 @@ export default {
   template: `
     <div class="admin-analytics px-3 mt-3 pb-5">
       <h3>Admin Analytics Dashboard</h3>
+      <div class="mt-4">
+        <button @click="downloadCSV" class="btn btn-primary">Download Completed Services CSV</button>
+      </div>
 
       <!-- Chart for Top 5 Rated Professionals -->
       <div class="mt-4">
